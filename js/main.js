@@ -616,6 +616,11 @@
       const typing = appendTyping();
       const topic = currentActiveTopic;
 
+      /* Statistiques : comptabiliser la question posée au chatbot. */
+      if (window.DarMarocStats && window.DarMarocStats.track) {
+        try { window.DarMarocStats.track('chat', value.slice(0, 120)); } catch (e) {}
+      }
+
       /* Réponse intelligente : IA Gemini si disponible, sinon moteur
          local (recherche de biens). Jamais d'erreur affichée. */
       const ai = window.DarMarocAI;
