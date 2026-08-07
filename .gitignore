@@ -1,0 +1,26 @@
+# Systemes / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Editeurs
+.vscode/
+.idea/
+*.swp
+*.sublime-project
+*.sublime-workspace
+
+# Node / dependances (a ne pas committer)
+node_modules/
+*.log
+
+# Secrets (a ne jamais committer meme en dev)
+.env
+.env.*
+*.pem
+service-account*.json
+
+# Sauvegardes locales
+backup-*/
+DarMaroc-Backups/
