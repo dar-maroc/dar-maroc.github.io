@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Connexion Admin - DarMaroc</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../images/icon-192.png">
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="login-body">
+  <div class="login-card" data-aos>
+    <div class="login-brand">
+      <img src="../images/logo.png" alt="DarMaroc" class="login-logo">
+      <span class="login-badge">Administration</span>
+    </div>
+
+    <h1 class="login-title">Tableau de bord</h1>
+    <p class="login-sub">Espace sécurisé — réservé à l'équipe DarMaroc</p>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="loginEmail"><i class="fas fa-user"></i> Identifiant</label>
+        <input type="text" id="loginEmail" name="email" autocomplete="username" required placeholder="darmaroc, user1…">
+      </div>
+      <div class="field">
+        <label for="loginPassword"><i class="fas fa-lock"></i> Mot de passe</label>
+        <input type="password" id="loginPassword" name="password" autocomplete="current-password" required placeholder="••••••••">
+      </div>
+      <div id="loginError" class="login-error" hidden></div>
+      <button type="submit" id="loginBtn" class="btn-login">
+        <span class="btn-label">Se connecter</span>
+        <span class="spinner" hidden></span>
+      </button>
+    </form>
+
+    <p class="login-foot"><a href="../index.html"><i class="fas fa-arrow-left"></i> Retour au site</a></p>
+  </div>
+
+  <script src="../config/site-config.js"></script>
+  <script src="../utils/helpers.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../utils/supabase.js"></script>
+  <script src="../utils/store.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
