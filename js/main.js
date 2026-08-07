@@ -375,45 +375,55 @@
   }
 
   // ===== PROPERTY SHOWCASE CAROUSEL =====
-  const showcase = document.querySelector('.property-showcase');
-  if (showcase) {
-    const slider = showcase.querySelector('.showcase-slider');
-    const slides = slider.querySelectorAll('.showcase-slide');
-    const dotsContainer = showcase.querySelector('.showcase-dots');
-    const prevBtn = showcase.querySelector('.showcase-prev');
-    const nextBtn = showcase.querySelector('.showcase-next');
-    let current = 0;
-    let interval;
+  // Logique extraite dans une fonction réinitialisable : le contenu des
+  // slides peut être régénéré par js/showcase.js (données CMS/Supabase),
+  // la fonction relit le DOM à chaque appel pour rester synchronisée.
+  window.DarMarocShowcaseCtrl = {
+    init: function () {
+      const showcase = document.querySelector('.property-showcase');
+      if (!showcase) return;
+      const slider = showcase.querySelector('.showcase-slider');
+      const slides = slider.querySelectorAll('.showcase-slide');
+      const dotsContainer = showcase.querySelector('.showcase-dots');
+      const prevBtn = showcase.querySelector('.showcase-prev');
+      const nextBtn = showcase.querySelector('.showcase-next');
+      if (!slides.length) return;
+      let current = 0;
+      let interval;
+      if (interval) clearInterval(interval);
+      dotsContainer.innerHTML = '';
 
-    slides.forEach((_, i) => {
-      const dot = document.createElement('span');
-      dot.classList.add('showcase-dot');
-      if (i === 0) dot.classList.add('active');
-      dot.addEventListener('click', () => goTo(i));
-      dotsContainer.appendChild(dot);
-    });
+      slides.forEach((_, i) => {
+        const dot = document.createElement('span');
+        dot.classList.add('showcase-dot');
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goTo(i));
+        dotsContainer.appendChild(dot);
+      });
 
-    function goTo(index) {
-      slides[current].classList.remove('active');
-      dotsContainer.children[current].classList.remove('active');
-      current = index;
-      slides[current].classList.add('active');
-      dotsContainer.children[current].classList.add('active');
+      function goTo(index) {
+        slides[current].classList.remove('active');
+        dotsContainer.children[current].classList.remove('active');
+        current = index;
+        slides[current].classList.add('active');
+        dotsContainer.children[current].classList.add('active');
+      }
+
+      function next() { goTo((current + 1) % slides.length); }
+      function prev() { goTo((current - 1 + slides.length) % slides.length); }
+
+      function startAuto() { interval = setInterval(next, 4000); }
+      function stopAuto() { clearInterval(interval); }
+
+      prevBtn.onclick = () => { stopAuto(); prev(); startAuto(); };
+      nextBtn.onclick = () => { stopAuto(); next(); startAuto(); };
+      showcase.onmouseenter = stopAuto;
+      showcase.onmouseleave = startAuto;
+
+      startAuto();
     }
-
-    function next() { goTo((current + 1) % slides.length); }
-    function prev() { goTo((current - 1 + slides.length) % slides.length); }
-
-    function startAuto() { interval = setInterval(next, 4000); }
-    function stopAuto() { clearInterval(interval); }
-
-    prevBtn.addEventListener('click', () => { stopAuto(); prev(); startAuto(); });
-    nextBtn.addEventListener('click', () => { stopAuto(); next(); startAuto(); });
-    showcase.addEventListener('mouseenter', stopAuto);
-    showcase.addEventListener('mouseleave', startAuto);
-
-    startAuto();
-  }
+  };
+  window.DarMarocShowcaseCtrl.init();
 
   // ===== CHATBOT DARMAROC =====
   const chatWidget = document.getElementById('chatbotWidget');

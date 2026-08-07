@@ -183,6 +183,24 @@ create table public.services (
   cree_le timestamptz not null default now()
 );
 
+-- Section "Démonstration" : slides du carrousel "Visitez Nos Biens en Vidéo"
+create table public.showcase (
+  id uuid primary key default gen_random_uuid(),
+  badge text not null default 'sale',
+  titre_fr text default '',
+  titre_ar text default '',
+  surface text default '',
+  chambres text default '',
+  sdb text default '',
+  prix text default '',
+  periode text default '',
+  img text default '',
+  alt text default '',
+  ordre int not null default 0,
+  actif boolean not null default true,
+  cree_le timestamptz not null default now()
+);
+
 create table public.temoignages (
   id uuid primary key default gen_random_uuid(),
   nom text not null,
@@ -528,6 +546,7 @@ alter table public.villes enable row level security;
 alter table public.quartiers enable row level security;
 alter table public.categories enable row level security;
 alter table public.services enable row level security;
+alter table public.showcase enable row level security;
 alter table public.temoignages enable row level security;
 alter table public.faq enable row level security;
 alter table public.annonces enable row level security;
@@ -551,6 +570,7 @@ create policy "contenu_public_select" on public.villes for select using (actif =
 create policy "contenu_public_select" on public.quartiers for select using (actif = true);
 create policy "contenu_public_select" on public.categories for select using (actif = true);
 create policy "contenu_public_select" on public.services for select using (actif = true);
+create policy "contenu_public_select" on public.showcase for select using (actif = true);
 create policy "contenu_public_select" on public.temoignages for select using (actif = true);
 create policy "contenu_public_select" on public.faq for select using (actif = true);
 create policy "contenu_public_select" on public.agences for select using (actif = true);
@@ -569,6 +589,7 @@ create policy "contenu_phase1_write" on public.villes for all using (true) with 
 create policy "contenu_phase1_write" on public.quartiers for all using (true) with check (true);
 create policy "contenu_phase1_write" on public.categories for all using (true) with check (true);
 create policy "contenu_phase1_write" on public.services for all using (true) with check (true);
+create policy "contenu_phase1_write" on public.showcase for all using (true) with check (true);
 create policy "contenu_phase1_write" on public.temoignages for all using (true) with check (true);
 create policy "contenu_phase1_write" on public.faq for all using (true) with check (true);
 create policy "contenu_phase1_write" on public.agences for all using (true) with check (true);

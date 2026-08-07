@@ -22,6 +22,7 @@
       <a href="#" class="nav-link active" data-view="overview"><i class="fas fa-gauge-high"></i> Aperçu</a>
       <a href="#" class="nav-link" data-view="stats"><i class="fas fa-chart-line"></i> Statistiques</a>
       <a href="#" class="nav-link" data-view="properties"><i class="fas fa-house"></i> Biens</a>
+      <a href="#" class="nav-link" data-view="showcase"><i class="fas fa-video"></i> Démonstration</a>
       <a href="#" class="nav-link" data-view="services"><i class="fas fa-wrench"></i> Services</a>
       <a href="#" class="nav-link" data-view="categories"><i class="fas fa-layer-group"></i> Catégories</a>
       <a href="#" class="nav-link" data-view="testimonials"><i class="fas fa-star"></i> Témoignages</a>
@@ -99,6 +100,21 @@
         </div>
       </section>
 
+      <!-- DEMONSTRATION (carrousel de biens) -->
+      <section id="view-showcase" class="view">
+        <div class="view-head">
+          <h3>Gérer la section Démonstration (carrousel « Visitez Nos Biens en Vidéo »)</h3>
+          <button class="btn-add" data-new="showcase"><i class="fas fa-plus"></i> Ajouter une slide</button>
+        </div>
+        <div class="table-wrap">
+          <table class="dash-table">
+            <thead><tr><th>Image</th><th>Titre (FR)</th><th>Badge</th><th>Prix</th><th>Position</th><th>Actions</th></tr></thead>
+            <tbody id="showcaseBody"></tbody>
+          </table>
+        </div>
+        <p class="muted" style="padding-top:8px;">Les slides apparaissent sur la page d'accueil dans la section « Démonstration ». La dernière slide (logo DarMaroc) est ajoutée automatiquement. <a href="../index.html#video-presentation" target="_blank" style="color:var(--gold);">Voir la section sur le site →</a></p>
+      </section>
+
       <!-- SERVICES -->
       <section id="view-services" class="view">
         <div class="view-head">
@@ -112,7 +128,6 @@
           </table>
         </div>
       </section>
-
       <!-- CATEGORIES -->
       <section id="view-categories" class="view">
         <div class="view-head">

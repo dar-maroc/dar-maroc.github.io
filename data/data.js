@@ -124,6 +124,16 @@ window.DARMAROC_DATA = (function () {
       }
     ],
 
+    /* ---------- Démonstration (carrousel de biens en vidéo) ---------- */
+    showcase: [
+      { id: 'sh1', badge: 'sale', fr: 'Villa de Luxe – Marrakech', ar: 'فيلا فاخرة – مراكش', surface: '250 m²', beds: '4 chambres', baths: '3 sdb', price: '2 500 000 DH', period: '', img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&q=85', alt: 'Villa Marrakech', delay: 0 },
+      { id: 'sh2', badge: 'rent', fr: 'Appartement Moderne – Casablanca', ar: 'شقة عصرية – الدار البيضاء', surface: '120 m²', beds: '3 chambres', baths: '2 sdb', price: '8 000 DH', period: 'mois', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=85', alt: 'Appartement Casablanca', delay: 1 },
+      { id: 'sh3', badge: 'sale', fr: 'Riad Traditionnel – Fès', ar: 'رياض تقليدي – فاس', surface: '320 m²', beds: '5 chambres', baths: '4 sdb', price: '4 200 000 DH', period: '', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=900&q=85', alt: 'Riad Fès', delay: 2 },
+      { id: 'sh4', badge: 'sale', fr: 'Appartement Économique – Agadir', ar: 'شقة اقتصادية – أكادير', surface: '85 m²', beds: '2 chambres', baths: '1 sdb', price: '350 000 DH', period: '', img: 'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=900&q=85', alt: 'Appartement Agadir', delay: 3 },
+      { id: 'sh5', badge: 'sale', fr: 'Villa avec Piscine – Agadir', ar: 'فيلا مع مسبح – أكادير', surface: '400 m²', beds: '6 chambres', baths: '4 sdb', price: '3 200 000 DH', period: '', img: 'https://images.unsplash.com/photo-1600566753086-00f18f6b1252?w=900&q=85', alt: 'Villa Agadir', delay: 4 },
+      { id: 'sh6', badge: 'sale', fr: 'Vue Mer – Appartement Tanger', ar: 'إطلالة بحرية – طنجة', surface: '90 m²', beds: '2 chambres', baths: '1 sdb', price: '950 000 DH', period: '', img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=900&q=85', alt: 'Appartement Tanger', delay: 5 }
+    ],
+
     /* ---------- Témoignages / Avis ---------- */
     testimonials: [
       { id: 't1', name: 'Karim H.', city: 'Casablanca', rating: 5, fr: 'DarMaroc a géré la vente de notre appartement à Casablanca en moins d\u2019un mois. Estimation juste, visites bien organisées et suivi notarial impeccable. Je recommande vivement cette équipe professionnelle.', ar: 'أدارت دارالمغرب بيع شقتنا في الدار البيضاء في أقل من شهر. تقدير عادل، زيارات منظمة جيداً ومتابعة عدلية ممتازة. أنصح بهذا الفريق المحترف بشدة.' },

@@ -18,7 +18,8 @@
     services: 'services',
     categories: 'categories',
     testimonials: 'temoignages',
-    faq: 'faq'
+    faq: 'faq',
+    showcase: 'showcase'
   };
 
   function client() { return Supabase.client; }
@@ -123,6 +124,24 @@
     if (collection === 'faq') {
       return { id: effectiveId(item.id), question_fr: item.fr || '', question_ar: item.ar || '', reponse_fr: item.aFR || '', reponse_ar: item.aAR || '' };
     }
+    if (collection === 'showcase') {
+      return {
+        id: effectiveId(item.id),
+        badge: item.badge || 'sale',
+        titre_fr: item.fr || '',
+        titre_ar: item.ar || '',
+        surface: item.surface || '',
+        chambres: item.beds || '',
+        sdb: item.baths || '',
+        prix: item.price || '',
+        periode: item.period || '',
+        img: item.img || '',
+        alt: item.alt || '',
+        ordre: typeof item.delay === 'number' ? item.delay : 0,
+        actif: item.actif !== false,
+        cree_le: item.createdAt || undefined
+      };
+    }
     return item;
   }
 
@@ -182,6 +201,23 @@
     if (collection === 'faq') {
       return { id: row.id, fr: row.question_fr || '', ar: row.question_ar || '', aFR: row.reponse_fr || '', aAR: row.reponse_ar || '' };
     }
+    if (collection === 'showcase') {
+      return {
+        id: row.id,
+        badge: row.badge || 'sale',
+        fr: row.titre_fr || '',
+        ar: row.titre_ar || '',
+        surface: row.surface || '',
+        beds: row.chambres || '',
+        baths: row.sdb || '',
+        price: row.prix || '',
+        period: row.periode || '',
+        img: row.img || '',
+        alt: row.alt || '',
+        delay: typeof row.ordre === 'number' ? row.ordre : 0,
+        createdAt: row.cree_le || ''
+      };
+    }
     return row;
   }
 
@@ -221,7 +257,7 @@
   /* ---------- API publique ---------- */
 
   /* Colonne de tri date par collection (les autres tables n'ont pas de date). */
-  var ORDER_COLS = { properties: 'date_depot', services: 'cree_le' };
+  var ORDER_COLS = { properties: 'date_depot', services: 'cree_le', showcase: 'ordre' };
 
   /* Lit une collection (Supabase si dispo, sinon localStorage). */
   function fetchCollection(collection) {

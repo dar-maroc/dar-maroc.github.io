@@ -22,6 +22,7 @@
     testimonials: [],
     faq: [],
     properties: [],
+    showcase: [],
     settings: {}
   };
 
@@ -37,6 +38,7 @@
           testimonials: parsed.testimonials || [],
           faq: parsed.faq || [],
           properties: parsed.properties || [],
+          showcase: parsed.showcase || [],
           settings: parsed.settings || {}
         };
       } else {
@@ -81,6 +83,18 @@
     DB.categories = (staticData.categories || []).map(function (c) { return { id: c.id || uid(), fr: c.fr, ar: c.ar, icon: c.icon || 'fa-layer-group' }; });
     DB.testimonials = (staticData.testimonials || []).map(function (t) { return { id: t.id || uid(), name: t.name, city: t.city || '', rating: t.rating || 5, fr: t.fr, ar: t.ar || '' }; });
     DB.faq = (staticData.faq || []).map(function (q) { return { id: q.id || uid(), fr: q.fr, ar: q.ar, aFR: q.aFR || '', aAR: q.aAR || '' }; });
+    DB.showcase = (staticData.showcase || []).map(function (s) {
+      return {
+        id: s.id || uid(),
+        badge: s.badge || 'sale',
+        fr: s.fr || '', ar: s.ar || '',
+        surface: s.surface || '', beds: s.beds || '', baths: s.baths || '',
+        price: s.price || '', period: s.period || '',
+        img: s.img || '', alt: s.alt || '',
+        delay: typeof s.delay === 'number' ? s.delay : 0,
+        createdAt: s.createdAt || ''
+      };
+    });
     seedProperties();
     DB.settings = {
       siteName: (cfg.site && cfg.site.name) || 'DarMaroc',
@@ -182,7 +196,7 @@
   }
 
   function syncFromCloud() {
-    var cols = ['properties', 'services', 'categories', 'testimonials', 'faq'];
+    var cols = ['properties', 'services', 'categories', 'testimonials', 'faq', 'showcase'];
     Promise.all(cols.map(function (c) { return window.DarMarocStore.fetchCollection(c); }))
       .then(function (results) {
         cols.forEach(function (c, i) {
@@ -307,8 +321,23 @@
     if (st) st.textContent = DB.properties.length;
   }
 
+  function renderShowcase() {
+    var body = document.getElementById('showcaseBody');
+    if (!body) return;
+    var badgeLabel = { sale: 'Vente', rent: 'Location' };
+    body.innerHTML = DB.showcase.map(function (s, i) {
+      var img = s.img ? '<img src="' + esc(s.img) + '" alt="" style="width:64px;height:40px;object-fit:cover;border-radius:4px;">' : '—';
+      return '<tr><td>' + img + '</td><td>' + esc(s.fr) + '</td><td>' + esc(badgeLabel[s.badge] || s.badge) + '</td><td>' + esc(s.price || '') + (s.period ? ' / ' + esc(s.period) : '') + '</td><td>' + (typeof s.delay === 'number' ? s.delay + 1 : '—') + '</td>' +
+        '<td><div class="row-actions">' +
+        '<button class="btn-icon" data-edit="showcase" data-index="' + i + '" title="Modifier"><i class="fas fa-pen"></i></button>' +
+        '<button class="btn-icon danger" data-del="showcase" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button>' +
+        '</div></td></tr>';
+    }).join('') || '<tr><td colspan="6" class="muted">Aucune slide. Cliquez sur « Ajouter une slide » pour commencer.</td></tr>';
+  }
+
   function renderAll() {
     renderProperties();
+    renderShowcase();
     renderServices();
     renderCategories();
     renderTestimonials();
@@ -700,6 +729,35 @@
     modalForm._type = 'faq';
   }
 
+  function showcaseForm(index) {
+    var s = index >= 0 ? DB.showcase[index] : { badge: 'sale', fr: '', ar: '', surface: '', beds: '', baths: '', price: '', period: '', img: '', alt: '', delay: 0 };
+    var badgeOpts = [
+      { v: 'sale', l: 'À vendre' },
+      { v: 'rent', l: 'À louer' }
+    ];
+    var periodOpts = [
+      { v: '', l: '— Aucun —' },
+      { v: 'jour', l: 'jour' },
+      { v: 'mois', l: 'mois' },
+      { v: 'nuit', l: 'nuit' }
+    ];
+    openModal(index >= 0 ? 'Modifier la slide' : 'Ajouter une slide',
+      field('Titre (FR)', 'fFr', s.fr, { required: true }) +
+      field('Titre (AR)', 'fAr', s.ar) +
+      field('Badge', 'fBadge', s.badge || 'sale', { type: 'select', options: badgeOpts }) +
+      field('Surface (ex: 250 m²)', 'fSurface', s.surface) +
+      field('Chambres (ex: 4 chambres)', 'fBeds', s.beds) +
+      field('Salles de bain (ex: 3 sdb)', 'fBaths', s.baths) +
+      field('Prix (ex: 2 500 000 DH)', 'fPrice', s.price) +
+      field('Période (jour / mois / nuit)', 'fPeriod', s.period, { type: 'select', options: periodOpts }) +
+      field('URL de l\'image', 'fImg', s.img) + imgUploadBlock() +
+      field('Texte alternatif (alt)', 'fAlt', s.alt) +
+      field('Position (ordre d\'affichage)', 'fDelay', String(typeof s.delay === 'number' ? s.delay : 0)));
+    modalForm._index = index;
+    modalForm._type = 'showcase';
+    bindImgUpload();
+  }
+
   var CATEGORIES = ['Appartement', 'Villa', 'Riad', 'Terrain', 'Local commercial', 'Bureau', 'Immeuble', 'Autre'];
 
   function countrySelect(value) {
@@ -821,6 +879,25 @@
       if (index >= 0) DB.faq[index] = q; else DB.faq.push(q);
       renderFaq(); toast('FAQ enregistrée.');
       persist(['faq']);
+    } else if (type === 'showcase') {
+      var sh = {
+        id: index >= 0 && DB.showcase[index] ? (DB.showcase[index].id || uid()) : uid(),
+        badge: getVal('fBadge') || 'sale',
+        fr: getVal('fFr'), ar: getVal('fAr'),
+        surface: getVal('fSurface'), beds: getVal('fBeds'), baths: getVal('fBaths'),
+        price: getVal('fPrice'), period: getVal('fPeriod'),
+        img: getVal('fImg'), alt: getVal('fAlt'),
+        delay: Number(getVal('fDelay')) || 0
+      };
+      sh.createdAt = index >= 0 && DB.showcase[index] ? (DB.showcase[index].createdAt || '') : new Date().toISOString();
+      if (index >= 0) DB.showcase[index] = sh; else DB.showcase.push(sh);
+      DB.showcase.sort(function (a, b) {
+        var da = typeof a.delay === 'number' ? a.delay : 0;
+        var db2 = typeof b.delay === 'number' ? b.delay : 0;
+        return da - db2;
+      });
+      renderShowcase(); toast('Slide enregistrée.');
+      persist(['showcase']);
     } else if (type === 'property') {
       var p = {
         id: index >= 0 && DB.properties[index] ? (DB.properties[index].id || uid()) : uid(),
@@ -854,7 +931,7 @@
     link.classList.add('active');
     document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
     document.getElementById('view-' + link.dataset.view).classList.add('active');
-    var titles = { overview: 'Aperçu', stats: 'Statistiques', properties: 'Biens', services: 'Services', categories: 'Catégories', testimonials: 'Témoignages', faq: 'FAQ', settings: 'Réglages', users: 'Utilisateurs' };
+    var titles = { overview: 'Aperçu', stats: 'Statistiques', properties: 'Biens', showcase: 'Démonstration', services: 'Services', categories: 'Catégories', testimonials: 'Témoignages', faq: 'FAQ', settings: 'Réglages', users: 'Utilisateurs' };
     document.getElementById('viewTitle').textContent = titles[link.dataset.view] || 'Aperçu';
     document.getElementById('sidebar').classList.remove('open');
   });
@@ -877,13 +954,14 @@
       else if (btn.dataset.new === 'category') categoryForm(-1);
       else if (btn.dataset.new === 'testimonial') testimonialForm(-1);
       else if (btn.dataset.new === 'faq') faqForm(-1);
+      else if (btn.dataset.new === 'showcase') showcaseForm(-1);
       else if (btn.dataset.new === 'property') propertyForm(-1);
       else if (btn.dataset.new === 'user') userForm(-1);
     });
   });
 
   /* Correspondance type de bouton -> collection (propertys/faqs n'existent pas). */
-  var COLMAP = { property: 'properties', service: 'services', category: 'categories', testimonial: 'testimonials', faq: 'faq' };
+  var COLMAP = { property: 'properties', service: 'services', category: 'categories', testimonial: 'testimonials', faq: 'faq', showcase: 'showcase' };
   function colName(t) { return COLMAP[t] || (t + 's'); }
 
   document.body.addEventListener('click', function (e) {
@@ -899,6 +977,7 @@
       else if (et === 'category') categoryForm(i);
       else if (et === 'testimonial') testimonialForm(i);
       else if (et === 'faq') faqForm(i);
+      else if (et === 'showcase') showcaseForm(i);
       else if (et === 'property') propertyForm(i);
       else if (et === 'user') userForm(i);
     } else if (delBtn) {

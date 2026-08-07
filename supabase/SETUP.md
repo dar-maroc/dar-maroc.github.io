@@ -21,7 +21,7 @@ avant** (100 % localStorage). Aucune page ne casse.
 1. Dans le dashboard Supabase, ouvrir **SQL Editor** → **New query**.
 2. Copier tout le contenu de `supabase/schema.sql`.
 3. Cliquer **Run**. Vous devriez voir les tables :
-   `annonces`, `services`, `categories`, `temoignages`, `faq`, `parametres`,
+   `annonces`, `services`, `categories`, `temoignages`, `faq`, `showcase`, `parametres`,
    `images`, `clients`, `demandes`, `admin_users`, etc.
    La fin du fichier crée aussi (optionnel) la table `stat_events` pour
    agréger les statistiques du site entre tous les appareils.
