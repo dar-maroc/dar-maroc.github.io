@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37"/>
+      <stop offset="50%" style="stop-color:#C99A2E"/>
+      <stop offset="100%" style="stop-color:#D4AF37"/>
+    </linearGradient>
+  </defs>
+  <!-- Moroccan arch inspired shape -->
+  <path d="M12 48 L12 20 Q12 8 22 8 L30 8" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M38 8 L46 8 Q56 8 56 20 L56 48" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Star (Moroccan symbol) -->
+  <polygon points="34,12 36,18 42,18 37,22 39,28 34,24 29,28 31,22 26,18 32,18" fill="url(#goldGrad)" opacity="0.9"/>
+  <!-- Text DarServices -->
+  <text x="68" y="32" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="url(#goldGrad)" letter-spacing="3">DarServices</text>
+  <text x="70" y="48" font-family="Arial, sans-serif" font-size="9" fill="#C99A2E" letter-spacing="4" opacity="0.8">SERVICE IMMOBILIÈRE</text>
+</svg>

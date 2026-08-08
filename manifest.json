@@ -1,0 +1,85 @@
+{
+  "name": "DarMaroc Immobilier & Services",
+  "short_name": "DarMaroc",
+  "description": "Votre partenaire de confiance pour l'immobilier, la rénovation et les services à domicile au Maroc.",
+  "lang": "fr",
+  "dir": "ltr",
+  "id": "darmaroc-site",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0F0F0F",
+  "theme_color": "#0F0F0F",
+  "categories": ["realestate", "home", "services"],
+  "launch_handler": { "client_mode": ["navigate-existing", "auto"] },
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Voir nos services",
+      "short_name": "Services",
+      "description": "Découvrir tous les services DarMaroc",
+      "url": "services.html",
+      "icons": [{ "src": "images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Déposer une annonce",
+      "short_name": "Annonce",
+      "description": "Publier une annonce immobilière",
+      "url": "deposer-annonce.html",
+      "icons": [{ "src": "images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Nous contacter",
+      "short_name": "Contact",
+      "description": "Contacter DarMaroc sur WhatsApp",
+      "url": "contact.html",
+      "icons": [{ "src": "images/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/banner-with-logo.png",
+      "sizes": "1717x916",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "DarMaroc — immobilier & services au Maroc"
+    }
+  ],
+  "share_target": {
+    "action": "deposer-annonce.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
