@@ -50,6 +50,26 @@
       seedProperties();
       saveLocal();
     }
+    if (!DB.showcase.length && window.DARMAROC_DATA && (window.DARMAROC_DATA.showcase || []).length) {
+      seedShowcase();
+      saveLocal();
+    }
+  }
+
+  function seedShowcase() {
+    var staticData = window.DARMAROC_DATA || {};
+    DB.showcase = (staticData.showcase || []).map(function (s) {
+      return {
+        id: s.id || uid(),
+        badge: s.badge || 'sale',
+        fr: s.fr || '', ar: s.ar || '',
+        surface: s.surface || '', beds: s.beds || '', baths: s.baths || '',
+        price: s.price || '', period: s.period || '',
+        img: s.img || '', alt: s.alt || '',
+        delay: typeof s.delay === 'number' ? s.delay : 0,
+        createdAt: s.createdAt || ''
+      };
+    });
   }
 
   function seedProperties() {
@@ -83,18 +103,7 @@
     DB.categories = (staticData.categories || []).map(function (c) { return { id: c.id || uid(), fr: c.fr, ar: c.ar, icon: c.icon || 'fa-layer-group' }; });
     DB.testimonials = (staticData.testimonials || []).map(function (t) { return { id: t.id || uid(), name: t.name, city: t.city || '', rating: t.rating || 5, fr: t.fr, ar: t.ar || '' }; });
     DB.faq = (staticData.faq || []).map(function (q) { return { id: q.id || uid(), fr: q.fr, ar: q.ar, aFR: q.aFR || '', aAR: q.aAR || '' }; });
-    DB.showcase = (staticData.showcase || []).map(function (s) {
-      return {
-        id: s.id || uid(),
-        badge: s.badge || 'sale',
-        fr: s.fr || '', ar: s.ar || '',
-        surface: s.surface || '', beds: s.beds || '', baths: s.baths || '',
-        price: s.price || '', period: s.period || '',
-        img: s.img || '', alt: s.alt || '',
-        delay: typeof s.delay === 'number' ? s.delay : 0,
-        createdAt: s.createdAt || ''
-      };
-    });
+    seedShowcase();
     seedProperties();
     DB.settings = {
       siteName: (cfg.site && cfg.site.name) || 'DarMaroc',
