@@ -19,6 +19,67 @@
   --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* ==================== THÈME CLAIR ====================
+   Redéfinit les variables pour basculer en mode clair. */
+html[data-theme="light"] {
+  --gold: #B8860B;
+  --gold-dark: #9A6E0A;
+  --gold-light: #D4AF37;
+  --bg-dark: #F7F5F0;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #EFECE4;
+  --white: #1A1A1A;
+  --text-light: #4A4A4A;
+  --text-muted: #777777;
+  --border-color: #DCD7CC;
+  --border-gold: rgba(184, 134, 11, 0.35);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .section-black,
+html[data-theme="light"] .footer,
+html[data-theme="light"] .top-bar,
+html[data-theme="light"] .page-header {
+  background: #F7F5F0;
+}
+
+html[data-theme="light"] .properties,
+html[data-theme="light"] .contact {
+  background: #FFFFFF;
+}
+
+html[data-theme="light"] .top-bar {
+  border-bottom-color: rgba(184, 134, 11, 0.2);
+}
+
+html[data-theme="light"] .footer {
+  border-top-color: rgba(184, 134, 11, 0.2);
+}
+
+html[data-theme="light"] .preloader-curtain-left,
+html[data-theme="light"] .preloader-curtain-right {
+  filter: none;
+}
+
+html[data-theme="light"] .partner-logo {
+  background: #FFFFFF;
+}
+
+html[data-theme="light"] .testimonial-card,
+html[data-theme="light"] .service-card-large,
+html[data-theme="light"] .process-step,
+html[data-theme="light"] .why-choose-item {
+  background: #FFFFFF;
+}
+
+html[data-theme="light"] .about-image-badge,
+html[data-theme="light"] .back-to-top,
+html[data-theme="light"] .detail-cta,
+html[data-theme="light"] .cta-btn-primary,
+html[data-theme="light"] .process-step-number {
+  color: #1A1A1A;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html { scroll-behavior: smooth; overflow-x: hidden; }
@@ -228,6 +289,11 @@ body::before {
   -webkit-backdrop-filter: blur(20px);
   padding: 12px 0;
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+html[data-theme="light"] .navbar.scrolled {
+  background: rgba(247, 245, 240, 0.95);
+  border-bottom-color: rgba(184, 134, 11, 0.2);
 }
 
 .navbar .container {
@@ -2035,6 +2101,10 @@ html[dir="rtl"] .chatbot-panel { right: auto; left: 24px; }
   height: 100%;
   border: none;
   filter: grayscale(0.5) invert(0.9);
+}
+
+html[data-theme="light"] .map-wrapper iframe {
+  filter: none;
 }
 
 /* ==================== THANK YOU ==================== */

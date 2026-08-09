@@ -1,6 +1,6 @@
-/* DarMaroc - Service Worker (PWA) v1.6.4 */
-const VERSION = 'darmaroc-v1.6.4';
-const CORE_CACHE = 'darmaroc-core-v14';
+/* DarMaroc - Service Worker (PWA) v1.6.5 */
+const VERSION = 'darmaroc-v1.6.5';
+const CORE_CACHE = 'darmaroc-core-v15';
 const IMAGE_CACHE = 'darmaroc-images-v2';
 const API_CACHE = 'darmaroc-api-v1';
 
@@ -23,6 +23,7 @@ const CORE_ASSETS = [
   './blog/renover-sa-maison-au-maroc.html',
   './blog/choisir-un-artisan-de-confiance.html',
   './css/style.css',
+  './js/theme.js',
   './js/main.js',
   './js/services.js',
   './js/testimonials.js',
