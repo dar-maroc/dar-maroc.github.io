@@ -2649,10 +2649,12 @@ body.no-scroll {
 .partner-logo { display:flex;align-items:center;gap:12px;padding:18px 32px;background:rgba(255,255,255,.03);border:1px solid var(--border-color);border-radius:10px;white-space:nowrap;transition:var(--transition); }
 .partner-logo:hover { border-color:var(--border-gold);background:rgba(212,175,55,.08);transform:translateY(-2px); }
 .partner-logo i { font-size:1.6rem;color:var(--gold); }
+.partner-logo img { width:56px;height:40px;object-fit:contain;filter:grayscale(1) brightness(1.4);transition:filter .3s; }
+.partner-logo:hover img { filter:grayscale(0) brightness(1); }
 .partner-logo span { font-family:var(--font-heading);font-size:1.05rem;color:var(--text-light);letter-spacing:.5px;font-weight:600; }
 [dir="rtl"] .partners-track { animation-name:partners-scroll-rtl; }
 @keyframes partners-scroll-rtl { from { transform:translateX(0); } to { transform:translateX(33.333%); } }
-@media (max-width:576px) { .partner-logo { padding:14px 20px; } .partner-logo i { font-size:1.3rem; } .partner-logo span { font-size:.9rem; } }
+@media (max-width:576px) { .partner-logo { padding:14px 20px; } .partner-logo i { font-size:1.3rem; } .partner-logo img { width:44px;height:32px; } .partner-logo span { font-size:.9rem; } }
 
 /* ==================== TESTIMONIALS ==================== */
 .testimonials-section { padding:80px 0;background:var(--bg-dark);position:relative; }

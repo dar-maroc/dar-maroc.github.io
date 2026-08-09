@@ -207,10 +207,14 @@ create table public.partners (
   nom_fr text default '',
   nom_ar text default '',
   icon text not null default 'fa-handshake',
+  logo text default '',
   ordre int not null default 0,
   actif boolean not null default true,
   cree_le timestamptz not null default now()
 );
+
+-- Migration pour les bases déjà existantes (sans effet si la colonne existe déjà).
+alter table public.partners add column if not exists logo text default '';
 
 create table public.temoignages (
   id uuid primary key default gen_random_uuid(),

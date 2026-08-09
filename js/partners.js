@@ -41,8 +41,11 @@
     var fr = esc(p.fr || p.name || '');
     var ar = esc(p.ar || fr);
     var name = isAr ? ar : fr;
+    var visual = p.img
+      ? '<img src="' + esc(p.img) + '" alt="' + fr + '" loading="lazy">'
+      : '<i class="fas ' + esc(p.icon || 'fa-handshake') + '"></i>';
     return '<div class="partner-logo">' +
-      '<i class="fas ' + esc(p.icon || 'fa-handshake') + '"></i>' +
+      visual +
       '<span data-fr="' + fr + '" data-ar="' + ar + '">' + name + '</span>' +
       '</div>';
   }

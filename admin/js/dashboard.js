@@ -69,6 +69,7 @@
         id: p.id || uid(),
         name: p.name || '', fr: p.fr || '', ar: p.ar || '',
         icon: p.icon || 'fa-handshake',
+        img: p.img || p.logo || '',
         delay: typeof p.delay === 'number' ? p.delay : 0,
         createdAt: p.createdAt || ''
       };
@@ -368,7 +369,7 @@
     var body = document.getElementById('partnerBody');
     if (!body) return;
     body.innerHTML = DB.partners.map(function (p, i) {
-      return '<tr><td>' + esc(p.fr || p.name) + '</td><td>' + esc(p.ar || '') + '</td><td><i class="fas ' + esc(p.icon || 'fa-handshake') + '"></i></td><td>' + (typeof p.delay === 'number' ? p.delay + 1 : '—') + '</td>' +
+      return '<tr><td>' + esc(p.fr || p.name) + '</td><td>' + esc(p.ar || '') + '</td><td>' + (p.img ? '<img src="' + esc(p.img) + '" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:8px;">' : '<i class="fas ' + esc(p.icon || 'fa-handshake') + '"></i>') + '</td><td>' + (typeof p.delay === 'number' ? p.delay + 1 : '—') + '</td>' +
         '<td><div class="row-actions">' +
         '<button class="btn-icon" data-edit="partner" data-index="' + i + '" title="Modifier"><i class="fas fa-pen"></i></button>' +
         '<button class="btn-icon danger" data-del="partner" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button>' +
@@ -801,14 +802,103 @@
   }
 
   function partnerForm(index) {
-    var p = index >= 0 ? DB.partners[index] : { name: '', fr: '', ar: '', icon: 'fa-handshake', delay: 0 };
+    var p = index >= 0 ? DB.partners[index] : { name: '', fr: '', ar: '', icon: 'fa-handshake', img: '', delay: 0 };
     openModal(index >= 0 ? 'Modifier le partenaire' : 'Ajouter un partenaire',
       field('Nom (FR)', 'fName', p.fr || p.name, { required: true }) +
       field('Nom (AR)', 'fAr', p.ar) +
-      field('Icône FontAwesome', 'fIcon', p.icon) +
+      '<div class="field"><label>Icône <i class="fas ' + esc(p.icon || 'fa-handshake') + '" id="fIconPreview"></i></label>' + iconPicker(p.icon || 'fa-handshake') + '</div>' +
+      field('Logo (URL ou upload ci-dessous)', 'fImg', p.img || '') +
+      logoUploadBlock() +
       field('Position (ordre d\'affichage)', 'fDelay', String(typeof p.delay === 'number' ? p.delay : 0)));
     modalForm._index = index;
     modalForm._type = 'partner';
+    bindIconPicker();
+    bindLogoUpload();
+  }
+
+  var PARTNER_ICONS = [
+    { v: 'fa-handshake', l: 'Poignée de main' },
+    { v: 'fa-building', l: 'Immeuble' },
+    { v: 'fa-hotel', l: 'Hôtel' },
+    { v: 'fa-home', l: 'Maison' },
+    { v: 'fa-house-chimney', l: 'Villa' },
+    { v: 'fa-basket-shopping', l: 'Supermarché' },
+    { v: 'fa-bus', l: 'Transport / Bus' },
+    { v: 'fa-truck', l: 'Camion' },
+    { v: 'fa-plane', l: 'Avion' },
+    { v: 'fa-ship', l: 'Bateau' },
+    { v: 'fa-tower-cell', l: 'Télécom' },
+    { v: 'fa-industry', l: 'Industrie' },
+    { v: 'fa-truck-ramp-box', l: 'Logistique' },
+    { v: 'fa-shield-halved', l: 'Assurance' },
+    { v: 'fa-landmark', l: 'Banque' },
+    { v: 'fa-bank', l: 'Banque 2' },
+    { v: 'fa-piggy-bank', l: 'Épargne' },
+    { v: 'fa-credit-card', l: 'Carte bancaire' },
+    { v: 'fa-phone', l: 'Téléphone' },
+    { v: 'fa-laptop', l: 'Technologie' },
+    { v: 'fa-plug', l: 'Électricité' },
+    { v: 'fa-droplet', l: 'Eau' },
+    { v: 'fa-gas-pump', l: 'Énergie' },
+    { v: 'fa-solar-panel', l: 'Solaire' },
+    { v: 'fa-graduation-cap', l: 'Éducation' },
+    { v: 'fa-heart-pulse', l: 'Santé' },
+    { v: 'fa-utensils', l: 'Restauration' },
+    { v: 'fa-cart-shopping', l: 'Commerce' },
+    { v: 'fa-store', l: 'Boutique' },
+    { v: 'fa-gem', l: 'Luxe' },
+    { v: 'fa-globe', l: 'International' },
+    { v: 'fa-users', l: 'Partenaires' },
+    { v: 'fa-star', l: 'Étoile' }
+  ];
+
+  function iconPicker(value) {
+    var opts = PARTNER_ICONS.map(function (o) {
+      return '<option value="' + esc(o.v) + '"' + (o.v === value ? ' selected' : '') + '>' + esc(o.l) + '</option>';
+    }).join('');
+    return '<select id="fIcon" data-preview="fIconPreview">' + opts + '</select>';
+  }
+
+  function bindIconPicker() {
+    var sel = document.getElementById('fIcon');
+    var prev = document.getElementById('fIconPreview');
+    if (!sel) return;
+    var update = function () {
+      if (prev) prev.className = 'fas ' + esc(sel.value || 'fa-handshake');
+    };
+    sel.addEventListener('change', update);
+    update();
+  }
+
+  function logoUploadBlock() {
+    return '<div class="field"><label>Ou importer un logo depuis l\'appareil (PC / smartphone / tablette)</label>' +
+      '<input type="file" id="fLogoFile" accept="image/*">' +
+      '<small class="muted" id="fLogoHint"></small></div>';
+  }
+
+  function bindLogoUpload() {
+    var fileEl = document.getElementById('fLogoFile');
+    var urlEl = document.getElementById('fImg');
+    var hint = document.getElementById('fLogoHint');
+    if (!fileEl || !urlEl) return;
+    fileEl.addEventListener('change', function () {
+      var file = fileEl.files && fileEl.files[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) {
+        toast('Image trop lourde (maximum 8 Mo).', true);
+        fileEl.value = '';
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        compressImage(reader.result, 1280, 0.75, function (compressed) {
+          urlEl.value = compressed;
+          if (hint) hint.textContent = 'Logo chargé depuis l\'appareil ✓';
+          toast('Logo chargé.');
+        });
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   var CATEGORIES = ['Appartement', 'Villa', 'Riad', 'Terrain', 'Local commercial', 'Bureau', 'Immeuble', 'Autre'];
@@ -956,6 +1046,7 @@
         id: index >= 0 && DB.partners[index] ? (DB.partners[index].id || uid()) : uid(),
         name: getVal('fName'), fr: getVal('fName'), ar: getVal('fAr'),
         icon: getVal('fIcon') || 'fa-handshake',
+        img: getVal('fImg') || '',
         delay: Number(getVal('fDelay')) || 0
       };
       pt.createdAt = index >= 0 && DB.partners[index] ? (DB.partners[index].createdAt || '') : new Date().toISOString();

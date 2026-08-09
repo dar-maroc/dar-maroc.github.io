@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    DAR MAROC - CONFIGURATION CENTRALISÉE (site-config.js)
    Toutes les données modifiables depuis le CMS sont ici / en base.
    ============================================================ */
@@ -30,7 +30,7 @@ window.DARMAROC_CONFIG = (function () {
 
     /* ---------- Réseaux sociaux ---------- */
     social: {
-      facebook: 'https://www.facebook.com/share/17tPyNue4V/',
+      facebook: 'https://www.facebook.com/DarMaroc0',
       instagram: 'https://www.instagram.com/dar___maroc',
       tiktok: 'https://www.tiktok.com/@dar_maroc',
       youtube: 'https://www.youtube.com/@Dar-Maroc'

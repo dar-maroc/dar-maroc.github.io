@@ -149,6 +149,7 @@
         nom_fr: item.fr || item.name || '',
         nom_ar: item.ar || '',
         icon: item.icon || 'fa-handshake',
+        logo: item.img || '',
         ordre: typeof item.delay === 'number' ? item.delay : 0,
         actif: item.actif !== false,
         cree_le: item.createdAt || undefined
@@ -237,8 +238,8 @@
         fr: row.nom_fr || row.nom || '',
         ar: row.nom_ar || '',
         icon: row.icon || 'fa-handshake',
-        delay: typeof row.ordre === 'number' ? row.ordre : 0,
-        createdAt: row.cree_le || ''
+        img: row.logo || '',
+        delay: typeof row.ordre === 'number' ? row.ordre : 0
       };
     }
     return row;
