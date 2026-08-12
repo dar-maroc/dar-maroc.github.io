@@ -151,9 +151,9 @@
              '💰 Nous pouvons vous proposer des biens selon votre budget. Dites-nous votre ville préférée !';
     }
     if (/contact|join|tel|appel|whatsapp|email|mail|تواصل|اتصال|هاتف/.test(t)) {
-      return lang === 'ar' ? '📲 للتواصل:\n• واتساب: +33 7 72 20 88 85\n• هاتف: 0525 26 14 86\n• بريد: Dar.maroc4@gmail.com' :
-             lang === 'en' ? '📲 To reach us:\n• WhatsApp: +33 7 72 20 88 85\n• Phone: 0525 26 14 86\n• Email: Dar.maroc4@gmail.com' :
-             '📲 Pour nous joindre :\n• WhatsApp : +33 7 72 20 88 85\n• Téléphone : 0525 26 14 86\n• Email : Dar.maroc4@gmail.com';
+      return lang === 'ar' ? '📲 للتواصل:\n• واتساب: +33 7 72 20 88 85\n• جوال: +212 665 310 308 / +212 667 090 303\n• مكتب: 05 25 26 14 86\n• بريد: Dar.maroc4@gmail.com' :
+             lang === 'en' ? '📲 To reach us:\n• WhatsApp: +33 7 72 20 88 85\n• Mobile: +212 665 310 308 / +212 667 090 303\n• Office: 05 25 26 14 86\n• Email: Dar.maroc4@gmail.com' :
+             '📲 Pour nous joindre :\n• WhatsApp : +33 7 72 20 88 85\n• Mobile : +212 665 310 308 / +212 667 090 303\n• Bureau : 05 25 26 14 86\n• Email : Dar.maroc4@gmail.com';
     }
     if (suggestions.length) {
       return intro + '\n' + suggestions.join('\n');

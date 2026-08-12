@@ -367,7 +367,9 @@
       { cle: 'slogan_ar', valeur: settings.sloganAR || '' },
       { cle: 'whatsapp', valeur: settings.whatsapp || '' },
       { cle: 'email', valeur: settings.email || '' },
-      { cle: 'telephone_fixe', valeur: settings.phoneFixed || '' }
+      { cle: 'telephone_fixe', valeur: settings.phoneFixed || '' },
+      { cle: 'telephone_mobile', valeur: settings.phoneMobile1 || '' },
+      { cle: 'telephone_mobile2', valeur: settings.phoneMobile2 || '' }
     ];
     var headers = {
       apikey: Supabase.anonKey,

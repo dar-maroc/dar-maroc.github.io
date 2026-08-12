@@ -16,6 +16,8 @@ window.DARMAROC_CONFIG = (function () {
       sloganAR: 'كل ما تحتاجه لمنزلك، بكل الخبرة المغربية.',
       phone: '+33 7 72 20 88 85',
       phoneFixed: '0525261486',
+      phoneMobile1: '+212665310308',
+      phoneMobile2: '+212667090303',
       email: 'Dar.maroc4@gmail.com',
       address: 'Agadir, Maroc',
       city: 'Agadir'

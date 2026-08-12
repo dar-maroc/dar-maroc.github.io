@@ -132,7 +132,9 @@
       sloganAR: (cfg.site && cfg.site.sloganAR) || '',
       whatsapp: (cfg.whatsapp && cfg.whatsapp.number) || '',
       email: (cfg.site && cfg.site.email) || '',
-      phoneFixed: (cfg.site && cfg.site.phoneFixed) || ''
+      phoneFixed: (cfg.site && cfg.site.phoneFixed) || '',
+      phoneMobile1: (cfg.site && cfg.site.phoneMobile1) || '',
+      phoneMobile2: (cfg.site && cfg.site.phoneMobile2) || ''
     };
   }
 
@@ -247,7 +249,9 @@
           sloganAR: s.slogan_ar || DB.settings.sloganAR,
           whatsapp: s.whatsapp || DB.settings.whatsapp,
           email: s.email || DB.settings.email,
-          phoneFixed: s.telephone_fixe || DB.settings.phoneFixed
+          phoneFixed: s.telephone_fixe || DB.settings.phoneFixed,
+          phoneMobile1: s.telephone_mobile || DB.settings.phoneMobile1,
+          phoneMobile2: s.telephone_mobile2 || DB.settings.phoneMobile2
         };
         saveLocal();
         fillSettings();
@@ -1331,6 +1335,8 @@
     document.getElementById('setWhatsApp').value = s.whatsapp || '';
     document.getElementById('setEmail').value = s.email || '';
     document.getElementById('setPhoneFixed').value = s.phoneFixed || '';
+    document.getElementById('setPhoneMobile1').value = s.phoneMobile1 || '';
+    document.getElementById('setPhoneMobile2').value = s.phoneMobile2 || '';
   }
 
   document.getElementById('settingsForm').addEventListener('submit', function (e) {
@@ -1342,7 +1348,9 @@
       sloganAR: getVal('setSloganAR'),
       whatsapp: getVal('setWhatsApp'),
       email: getVal('setEmail'),
-      phoneFixed: getVal('setPhoneFixed')
+      phoneFixed: getVal('setPhoneFixed'),
+      phoneMobile1: getVal('setPhoneMobile1'),
+      phoneMobile2: getVal('setPhoneMobile2')
     };
     saveLocal();
     if (window.DarMarocStore && window.DarMarocStore.hasBackend()) {

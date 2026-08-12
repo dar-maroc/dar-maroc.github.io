@@ -448,7 +448,7 @@
         renov_q: 'Au service ! 🛠️ Pour établir votre devis GRATUIT :\n• 🚪 Quelle pièce ? (cuisine, salon, salle de bain…)\n• 🎨 Quels travaux ? (peinture, carrelage, plomberie…)\n\nÉcrivez votre réponse ci-dessous ✍️',
         renov_ok: 'Merci ! 🙏 Votre projet est noté.\nNous vous envoyons un devis gratuit 📝',
         hours: '🕐 Nos horaires : Lundi – Samedi, 9h à 19h.\n📍 Av. Annarjis, Agadir, Maroc.\nEn dehors de ces heures, nous répondons dès l\'ouverture 😊',
-        contact: '📲 Besoin d\'un conseiller ?\n• WhatsApp : +33 7 72 20 88 85\n• Appel : 0525 26 14 86\n• Email : Dar.maroc4@gmail.com'
+        contact: '📲 Besoin d\'un conseiller ?\n• WhatsApp : +33 7 72 20 88 85\n• Mobile : +212 665 310 308 / +212 667 090 303\n• Bureau : 05 25 26 14 86\n• Email : Dar.maroc4@gmail.com'
       },
       ar: {
         intro: 'مرحباً 👋 أهلاً بك في دار المغرب!\nاختر خياراً للبدء:',
@@ -461,7 +461,7 @@
         renov_q: 'في خدمتك! 🛠️ لإعداد دراستك المجانية:\n• 🚪 أي غرفة؟ (مطبخ، صالون، حمام...)\n• 🎨 أي أشغال؟ (دهان، بلاط، سباكة...)\n\nاكتب إجابتك بالأسفل ✍️',
         renov_ok: 'شكراً! 🙏 سجلنا مشروعك.\nسنرسل لك دراسة مجانية 📝',
         hours: '🕐 أوقات العمل: الاثنين – السبت، من 9 إلى 19.\n📍 شارع النرجس، أكادير، المغرب.\nخارج هذه الأوقات نرد بمجرد الافتتاح 😊',
-        contact: '📲 بحاجة إلى مستشار؟\n• واتساب: +33 7 72 20 88 85\n• هاتف: 0525 26 14 86\n• بريد: Dar.maroc4@gmail.com'
+        contact: '📲 بحاجة إلى مستشار؟\n• واتساب: +33 7 72 20 88 85\n• جوال: +212 665 310 308 / +212 667 090 303\n• مكتب: 05 25 26 14 86\n• بريد: Dar.maroc4@gmail.com'
       },
       en: {
         intro: 'Hello 👋 Welcome to DarMaroc!\nChoose an option to get started:',
@@ -474,7 +474,7 @@
         renov_q: 'At your service! 🛠️ For your FREE quote:\n• 🚪 Which room? (kitchen, living room, bathroom...)\n• 🎨 What work? (painting, tiling, plumbing...)\n\nWrite your answer below ✍️',
         renov_ok: 'Thank you! 🙏 Your project is noted.\nWe will send you a free quote 📝',
         hours: '🕐 Our hours: Monday – Saturday, 9am to 7pm.\n📍 Av. Annarjis, Agadir, Morocco.\nOutside these hours, we reply as soon as we open 😊',
-        contact: '📲 Need an advisor?\n• WhatsApp: +33 7 72 20 88 85\n• Call: 0525 26 14 86\n• Email: Dar.maroc4@gmail.com'
+        contact: '📲 Need an advisor?\n• WhatsApp: +33 7 72 20 88 85\n• Mobile: +212 665 310 308 / +212 667 090 303\n• Office: 05 25 26 14 86\n• Email: Dar.maroc4@gmail.com'
       }
     };
 

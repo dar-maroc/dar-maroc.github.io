@@ -688,7 +688,9 @@ insert into public.parametres (cle, valeur) values
   ('slogan_ar', 'كل ما تحتاجه لمنزلك، بكل الخبرة المغربية.'),
   ('whatsapp', '33772208885'),
   ('email', 'Dar.maroc4@gmail.com'),
-  ('telephone_fixe', '0525261486')
+  ('telephone_fixe', '0525261486'),
+  ('telephone_mobile', '+212665310308'),
+  ('telephone_mobile2', '+212667090303')
 on conflict (cle) do nothing;
 
 -- ============================================================
