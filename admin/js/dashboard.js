@@ -24,6 +24,7 @@
     properties: [],
     showcase: [],
     partners: [],
+    contacts: [],
     settings: {}
   };
 
@@ -41,6 +42,7 @@
           properties: parsed.properties || [],
           showcase: parsed.showcase || [],
           partners: parsed.partners || [],
+          contacts: parsed.contacts || [],
           settings: parsed.settings || {}
         };
       } else {
@@ -74,6 +76,32 @@
         createdAt: p.createdAt || ''
       };
     });
+  }
+
+  var CONTACT_ICONS = [
+    { v: 'fa-building', l: '🔧 Fixe / Bureau' },
+    { v: 'fa-mobile-alt', l: '📱 Mobile' },
+    { v: 'fa-whatsapp', l: '💬 WhatsApp' },
+    { v: 'fa-envelope', l: '📧 Email' },
+    { v: 'fa-phone-alt', l: '📞 Téléphone' }
+  ];
+
+  function seedContacts() {
+    var staticData = window.DARMAROC_DATA || {};
+    var seeded = (staticData.contacts || []).map(function (c) {
+      return { id: c.id || uid(), label: c.label || '', value: c.value || '', icon: c.icon || 'fa-phone-alt' };
+    });
+    if (seeded.length) {
+      DB.contacts = seeded;
+    } else {
+      DB.contacts = [
+        { id: uid(), label: 'Bureau', value: '05 25 26 14 86', icon: 'fa-building' },
+        { id: uid(), label: 'Mobile 1', value: '+212 665 310 308', icon: 'fa-mobile-alt' },
+        { id: uid(), label: 'Mobile 2', value: '+212 667 090 303', icon: 'fa-mobile-alt' },
+        { id: uid(), label: 'WhatsApp France', value: '+33 7 72 20 88 85', icon: 'fa-whatsapp' },
+        { id: uid(), label: 'Email', value: 'Dar.maroc4@gmail.com', icon: 'fa-envelope' }
+      ];
+    }
   }
 
   function seedShowcase() {
@@ -121,11 +149,12 @@
       };
     });
     DB.categories = (staticData.categories || []).map(function (c) { return { id: c.id || uid(), fr: c.fr, ar: c.ar, icon: c.icon || 'fa-layer-group' }; });
-    DB.testimonials = (staticData.testimonials || []).map(function (t) { return { id: t.id || uid(), name: t.name, city: t.city || '', rating: t.rating || 5, fr: t.fr, ar: t.ar || '' }; });
+    DB.testimonials = (staticData.testimonials || []).map(function (t) { return { id: t.id || uid(), name: t.name, city: t.city || '', rating: t.rating || 5, fr: t.fr, ar: t.ar || '' };     });
     DB.faq = (staticData.faq || []).map(function (q) { return { id: q.id || uid(), fr: q.fr, ar: q.ar, aFR: q.aFR || '', aAR: q.aAR || '' }; });
     seedShowcase();
     seedPartners();
     seedProperties();
+    seedContacts();
     DB.settings = {
       siteName: (cfg.site && cfg.site.name) || 'DarMaroc',
       sloganFR: (cfg.site && cfg.site.sloganFR) || '',
@@ -228,7 +257,7 @@
   }
 
   function syncFromCloud() {
-    var cols = ['properties', 'services', 'categories', 'testimonials', 'faq', 'showcase', 'partners'];
+    var cols = ['properties', 'services', 'categories', 'testimonials', 'faq', 'showcase', 'partners', 'contacts'];
     Promise.all(cols.map(function (c) { return window.DarMarocStore.fetchCollection(c); }))
       .then(function (results) {
         cols.forEach(function (c, i) {
@@ -381,10 +410,25 @@
     }).join('') || '<tr><td colspan="5" class="muted">Aucun partenaire. Cliquez sur « Ajouter un partenaire » pour commencer.</td></tr>';
   }
 
+  function renderContacts() {
+    var body = document.getElementById('contactBody');
+    if (!body) return;
+    body.innerHTML = DB.contacts.map(function (c, i) {
+      return '<tr><td><i class="fas ' + esc(c.icon || 'fa-phone-alt') + '" style="color:var(--gold);margin-right:6px;"></i> ' + esc(c.icon || '') + '</td><td><strong>' + esc(c.label || '') + '</strong></td><td>' + esc(c.value || '') + '</td>' +
+        '<td><div class="row-actions">' +
+        '<button class="btn-icon" data-edit="contact" data-index="' + i + '" title="Modifier"><i class="fas fa-pen"></i></button>' +
+        '<button class="btn-icon danger" data-del="contact" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button>' +
+        '</div></td></tr>';
+    }).join('') || '<tr><td colspan="4" class="muted">Aucun contact. Cliquez sur « Ajouter un contact » pour commencer.</td></tr>';
+    var st = document.getElementById('statContacts');
+    if (st) st.textContent = DB.contacts.length;
+  }
+
   function renderAll() {
     renderProperties();
     renderShowcase();
     renderPartners();
+    renderContacts();
     renderServices();
     renderCategories();
     renderTestimonials();
@@ -820,6 +864,16 @@
     bindLogoUpload();
   }
 
+  function contactForm(index) {
+    var c = index >= 0 ? DB.contacts[index] : { label: '', value: '', icon: 'fa-phone-alt' };
+    openModal(index >= 0 ? 'Modifier le contact' : 'Ajouter un contact',
+      field('Libellé (ex: Bureau, Mobile 1)', 'fLabel', c.label, { required: true }) +
+      field('Valeur / Numéro (ex: +212 665 310 308)', 'fValue', c.value, { required: true }) +
+      field('Type d\'icône (combobox)', 'fIcon', c.icon || 'fa-phone-alt', { type: 'select', options: CONTACT_ICONS }));
+    modalForm._index = index;
+    modalForm._type = 'contact';
+  }
+
   var PARTNER_ICONS = [
     { v: 'fa-handshake', l: 'Poignée de main' },
     { v: 'fa-building', l: 'Immeuble' },
@@ -1062,6 +1116,16 @@
       });
       renderPartners(); toast('Partenaire enregistré.');
       persist(['partners']);
+    } else if (type === 'contact') {
+      var ct = {
+        id: index >= 0 && DB.contacts[index] ? (DB.contacts[index].id || uid()) : uid(),
+        label: getVal('fLabel'),
+        value: getVal('fValue'),
+        icon: getVal('fIcon') || 'fa-phone-alt'
+      };
+      if (index >= 0) DB.contacts[index] = ct; else DB.contacts.push(ct);
+      renderContacts(); toast('Contact enregistré.');
+      persist(['contacts']);
     } else if (type === 'property') {
       var p = {
         id: index >= 0 && DB.properties[index] ? (DB.properties[index].id || uid()) : uid(),
@@ -1095,7 +1159,7 @@
     link.classList.add('active');
     document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
     document.getElementById('view-' + link.dataset.view).classList.add('active');
-    var titles = { overview: 'Aperçu', stats: 'Statistiques', properties: 'Biens', showcase: 'Démonstration', partners: 'Partenaires', services: 'Services', categories: 'Catégories', testimonials: 'Témoignages', faq: 'FAQ', settings: 'Réglages', users: 'Utilisateurs' };
+    var titles = { overview: 'Aperçu', stats: 'Statistiques', properties: 'Biens', showcase: 'Démonstration', partners: 'Partenaires', services: 'Services', categories: 'Catégories', testimonials: 'Témoignages', faq: 'FAQ', contacts: 'Contacts', settings: 'Réglages', users: 'Utilisateurs' };
     document.getElementById('viewTitle').textContent = titles[link.dataset.view] || 'Aperçu';
     document.getElementById('sidebar').classList.remove('open');
   });
@@ -1121,12 +1185,13 @@
       else if (btn.dataset.new === 'showcase') showcaseForm(-1);
       else if (btn.dataset.new === 'partner') partnerForm(-1);
       else if (btn.dataset.new === 'property') propertyForm(-1);
+      else if (btn.dataset.new === 'contact') contactForm(-1);
       else if (btn.dataset.new === 'user') userForm(-1);
     });
   });
 
   /* Correspondance type de bouton -> collection (propertys/faqs n'existent pas). */
-  var COLMAP = { property: 'properties', service: 'services', category: 'categories', testimonial: 'testimonials', faq: 'faq', showcase: 'showcase', partner: 'partners' };
+  var COLMAP = { property: 'properties', service: 'services', category: 'categories', testimonial: 'testimonials', faq: 'faq', showcase: 'showcase', partner: 'partners', contact: 'contacts' };
   function colName(t) { return COLMAP[t] || (t + 's'); }
 
   document.body.addEventListener('click', function (e) {
@@ -1145,6 +1210,7 @@
       else if (et === 'showcase') showcaseForm(i);
       else if (et === 'partner') partnerForm(i);
       else if (et === 'property') propertyForm(i);
+      else if (et === 'contact') contactForm(i);
       else if (et === 'user') userForm(i);
     } else if (delBtn) {
       var idx = Number(delBtn.dataset.index);

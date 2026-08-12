@@ -29,6 +29,7 @@
       <a href="#" class="nav-link" data-view="testimonials"><i class="fas fa-star"></i> Témoignages</a>
       <a href="#" class="nav-link" data-view="faq"><i class="fas fa-circle-question"></i> FAQ</a>
       <a href="#" class="nav-link" data-view="settings"><i class="fas fa-gear"></i> Réglages</a>
+      <a href="#" class="nav-link" data-view="contacts"><i class="fas fa-address-book"></i> Contacts</a>
       <a href="#" class="nav-link" data-view="users"><i class="fas fa-users"></i> Utilisateurs</a>
     </nav>
     <div class="sidebar-foot">
@@ -58,6 +59,7 @@
           <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-layer-group"></i></div><div><strong id="statCats">0</strong><span>Catégories</span></div></div>
           <div class="stat-card"><div class="stat-icon green"><i class="fas fa-star"></i></div><div><strong id="statTesti">0</strong><span>Témoignages</span></div></div>
           <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-circle-question"></i></div><div><strong id="statFaq">0</strong><span>FAQ</span></div></div>
+          <div class="stat-card"><div class="stat-icon teal"><i class="fas fa-address-book"></i></div><div><strong id="statContacts">0</strong><span>Contacts</span></div></div>
         </div>
         <div class="card">
           <h3>Mode de stockage</h3>
@@ -184,6 +186,21 @@
             <tbody id="faqBody"></tbody>
           </table>
         </div>
+      </section>
+
+      <!-- CONTACTS -->
+      <section id="view-contacts" class="view">
+        <div class="view-head">
+          <h3>Gérer les contacts</h3>
+          <button class="btn-add" data-new="contact"><i class="fas fa-plus"></i> Ajouter un contact</button>
+        </div>
+        <div class="table-wrap">
+          <table class="dash-table">
+            <thead><tr><th>Type / Icône</th><th>Libellé</th><th>Valeur / Numéro</th><th>Actions</th></tr></thead>
+            <tbody id="contactBody"></tbody>
+          </table>
+        </div>
+        <p class="muted" style="padding-top:8px;">Cliquez sur le crayon pour modifier, ou la corbeille pour supprimer un contact. L'icône dépend du type (fixe, mobile, WhatsApp, email).</p>
       </section>
 
       <!-- UTILISATEURS (admin uniquement) -->
