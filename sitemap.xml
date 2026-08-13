@@ -51,11 +51,6 @@
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://dar-maroc.github.io/thank-you.html</loc>
-    <lastmod>2026-08-07</lastmod>
-    <priority>0.3</priority>
-  </url>
-  <url>
     <loc>https://dar-maroc.github.io/blog/</loc>
     <lastmod>2026-08-07</lastmod>
     <priority>0.8</priority>
@@ -74,10 +69,5 @@
     <loc>https://dar-maroc.github.io/blog/choisir-un-artisan-de-confiance.html</loc>
     <lastmod>2026-08-07</lastmod>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dar-maroc.github.io/404.html</loc>
-    <lastmod>2026-08-07</lastmod>
-    <priority>0.1</priority>
   </url>
 </urlset>
