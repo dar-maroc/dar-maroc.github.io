@@ -62,6 +62,10 @@
       seedPartners();
       saveLocal();
     }
+    if (!DB.contacts.length) {
+      seedContacts();
+      saveLocal();
+    }
   }
 
   function seedPartners() {
