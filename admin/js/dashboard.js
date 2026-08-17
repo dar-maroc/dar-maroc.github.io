@@ -1172,6 +1172,15 @@
     document.getElementById('sidebar').classList.toggle('open');
   });
 
+  document.addEventListener('click', function (e) {
+    var sidebar = document.getElementById('sidebar');
+    var menuToggle = document.getElementById('menuToggle');
+    if (window.innerWidth <= 768 && sidebar.classList.contains('open') &&
+        !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      sidebar.classList.remove('open');
+    }
+  });
+
   var statsRefreshBtn = document.getElementById('statsRefresh');
   if (statsRefreshBtn) {
     statsRefreshBtn.addEventListener('click', function () {
