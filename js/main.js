@@ -118,7 +118,7 @@
       });
     });
 
-    document.addEventListener('click', event => {
+    document.addEventListener('pointerdown', event => {
       if (window.innerWidth <= 992 && navLinks.classList.contains('active') &&
           !navLinks.contains(event.target) && !navToggle.contains(event.target)) {
         closeMobileMenu();

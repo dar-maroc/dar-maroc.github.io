@@ -1172,7 +1172,7 @@
     document.getElementById('sidebar').classList.toggle('open');
   });
 
-  document.addEventListener('click', function (e) {
+  document.addEventListener('pointerdown', function (e) {
     var sidebar = document.getElementById('sidebar');
     var menuToggle = document.getElementById('menuToggle');
     if (window.innerWidth <= 768 && sidebar.classList.contains('open') &&
