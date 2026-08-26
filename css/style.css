@@ -2509,11 +2509,27 @@ html[data-theme="light"] .map-wrapper iframe {
   cursor: pointer;
   transition: var(--transition);
   font-size: 0.95rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .theme-toggle:hover {
   border-color: var(--gold);
   color: var(--gold);
+}
+
+.theme-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,175,55,0.5) 0%, transparent 70%);
+  animation: themeRipple 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes themeRipple {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
 }
 
 .top-bar .theme-toggle {

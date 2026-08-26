@@ -44,6 +44,18 @@
     var isLight = document.documentElement.getAttribute('data-theme') === 'light';
     applyTheme(isLight ? 'dark' : 'light');
     save(isLight ? 'dark' : 'light');
+
+    var btn = document.querySelector('.theme-toggle, .dark-mode-toggle');
+    if (btn && window.innerWidth <= 992) {
+      btn.style.transition = 'transform 0.4s cubic-bezier(.4,0,.2,1)';
+      btn.style.transform = 'rotate(360deg) scale(1.3)';
+      setTimeout(function () { btn.style.transform = ''; }, 420);
+
+      var ripple = document.createElement('div');
+      ripple.className = 'theme-ripple';
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', function () { ripple.remove(); });
+    }
   }
 
   function bind() {
