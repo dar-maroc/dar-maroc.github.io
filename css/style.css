@@ -2163,8 +2163,9 @@ html[data-theme="light"] .map-wrapper iframe {
     top: 0; right: -100%;
     width: 300px;
     height: 100vh;
-    background: rgba(5, 5, 5, 0.98);
-    backdrop-filter: blur(20px);
+    background: rgba(10, 10, 10, 0.65);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
     flex-direction: column;
     justify-content: center;
     align-items: center;
