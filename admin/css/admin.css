@@ -38,8 +38,9 @@ body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--t
   position: absolute;
   inset: 0;
   background: url('../images/logo.png') center center no-repeat;
-  background-size: 320px auto;
-  opacity: 0.06;
+  background-size: 280px auto;
+  opacity: 0.12;
+  filter: grayscale(1) brightness(0.8) sepia(0.5) hue-rotate(10deg);
   pointer-events: none;
 }
 .login-card {
