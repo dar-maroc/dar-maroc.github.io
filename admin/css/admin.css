@@ -27,9 +27,20 @@ body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--t
   align-items: center;
   justify-content: center;
   padding: 24px;
+  position: relative;
+  background-color: var(--bg);
   background-image:
     radial-gradient(ellipse at 30% 20%, rgba(212,175,55,0.15), transparent 55%),
     radial-gradient(ellipse at 70% 80%, rgba(212,175,55,0.08), transparent 55%);
+}
+.login-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('../images/logo.png') center center no-repeat;
+  background-size: 320px auto;
+  opacity: 0.06;
+  pointer-events: none;
 }
 .login-card {
   width: 100%;
