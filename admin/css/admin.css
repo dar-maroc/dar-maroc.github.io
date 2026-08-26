@@ -33,15 +33,20 @@ body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--t
     radial-gradient(ellipse at 30% 20%, rgba(212,175,55,0.15), transparent 55%),
     radial-gradient(ellipse at 70% 80%, rgba(212,175,55,0.08), transparent 55%);
 }
-.login-body::before {
-  content: '';
-  position: absolute;
+.login-bg-logo {
+  position: fixed;
   inset: 0;
-  background: url('../images/logo.png') center center no-repeat;
-  background-size: 280px auto;
-  opacity: 0.12;
-  filter: grayscale(1) brightness(0.8) sepia(0.5) hue-rotate(10deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
+  z-index: 0;
+}
+.login-bg-logo img {
+  width: 280px;
+  height: auto;
+  opacity: 0.08;
+  filter: grayscale(1) brightness(0.8) sepia(0.5) hue-rotate(10deg);
 }
 .login-card {
   width: 100%;
@@ -51,6 +56,8 @@ body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--t
   border-radius: 18px;
   padding: 40px 36px;
   box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  position: relative;
+  z-index: 1;
 }
 .login-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
 .login-logo { width: 52px; height: 52px; border-radius: 12px; }
