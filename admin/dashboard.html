@@ -33,6 +33,8 @@
       <a href="#" class="nav-link" data-view="cleaning"><i class="fas fa-broom"></i> Menage</a>
       <a href="#" class="nav-link" data-view="maintenance"><i class="fas fa-wrench"></i> Maintenance</a>
       <a href="#" class="nav-link" data-view="access"><i class="fas fa-key"></i> Acces</a>
+      <a href="#" class="nav-link" data-view="pricing"><i class="fas fa-tags"></i> Tarification</a>
+      <a href="#" class="nav-link" data-view="prestataires"><i class="fas fa-user-helmet-safety"></i> Prestataires</a>
       <a href="#" class="nav-link" data-view="compliance"><i class="fas fa-shield-halved"></i> Conformite</a>
       <div class="nav-group-label">Marketing & IA</div>
       <a href="#" class="nav-link" data-view="showcase"><i class="fas fa-video"></i> Demonstration</a>
@@ -49,6 +51,8 @@
       <a href="#" class="nav-link" data-view="documents"><i class="fas fa-folder"></i> Documents</a>
       <a href="#" class="nav-link" data-view="notifications"><i class="fas fa-bell"></i> Notifications</a>
       <a href="#" class="nav-link" data-view="reports"><i class="fas fa-file-lines"></i> Rapports</a>
+      <a href="#" class="nav-link" data-view="audit"><i class="fas fa-clock-rotate-left"></i> Journal d'activite</a>
+      <a href="#" class="nav-link" data-view="roles"><i class="fas fa-user-shield"></i> Roles</a>
       <a href="#" class="nav-link" data-view="users"><i class="fas fa-users"></i> Utilisateurs</a>
       <a href="#" class="nav-link" data-view="settings"><i class="fas fa-gear"></i> Reglages</a>
     </nav>
@@ -74,12 +78,23 @@
       <!-- OVERVIEW -->
       <section id="view-overview" class="view active">
         <div class="stat-grid">
-          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-house"></i></div><div><strong id="statProps">0</strong><span>Biens</span></div></div>
-          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-wrench"></i></div><div><strong id="statServices">0</strong><span>Services</span></div></div>
-          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-layer-group"></i></div><div><strong id="statCats">0</strong><span>Catégories</span></div></div>
-          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-star"></i></div><div><strong id="statTesti">0</strong><span>Témoignages</span></div></div>
-          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-circle-question"></i></div><div><strong id="statFaq">0</strong><span>FAQ</span></div></div>
-          <div class="stat-card"><div class="stat-icon teal"><i class="fas fa-address-book"></i></div><div><strong id="statContacts">0</strong><span>Contacts</span></div></div>
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-house"></i></div><div><strong id="kpiActive">0</strong><span>Logements actifs</span></div></div>
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-door-open"></i></div><div><strong id="kpiAvailable">0</strong><span>Disponibles</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div><div><strong id="kpiReservations">0</strong><span>Réservations</span></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-plane-arrival"></i></div><div><strong id="kpiArrivals">0</strong><span>Arrivées aujourd'hui</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-plane-departure"></i></div><div><strong id="kpiDepartures">0</strong><span>Départs aujourd'hui</span></div></div>
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-percent"></i></div><div><strong id="kpiOccupancy">0%</strong><span>Taux occupation</span></div></div>
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-euro-sign"></i></div><div><strong id="kpiRevenue">0 MAD</strong><span>Revenus</span></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-hourglass-half"></i></div><div><strong id="kpiPendingPay">0</strong><span>Paiements en attente</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-broom"></i></div><div><strong id="kpiCleaning">0</strong><span>Tâches ménage</span></div></div>
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-wrench"></i></div><div><strong id="kpiMaint">0</strong><span>Maintenance</span></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-triangle-exclamation"></i></div><div><strong id="kpiAlerts">0</strong><span>Alertes</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-file-lines"></i></div><div><strong id="kpiDocs">0</strong><span>Documents</span></div></div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-robot" style="color:var(--gold);"></i> AI Manager</h3>
+          <div id="aiOverview"><p class="muted">Chargement des alertes IA…</p></div>
+          <p class="muted" style="margin-top:10px;">L'IA analyse les opérations et propose des actions. Les décisions juridiques, litiges et remboursements restent réservés à la validation humaine.</p>
         </div>
         <div class="card">
           <h3>Mode de stockage</h3>
@@ -291,6 +306,169 @@
             <button type="submit" class="btn-save"><i class="fas fa-key"></i> Changer le mot de passe</button>
           </form>
         </div>
+      </section>
+
+
+      <!-- CALENDRIER -->
+      <section id="view-calendar" class="view">
+        <div class="view-head">
+          <h3>Calendrier — planning des interventions</h3>
+          <button class="btn-add" data-new="calendar-event"><i class="fas fa-plus"></i> Ajouter</button>
+        </div>
+        <div class="card"><div class="calendar-grid" id="calendarGrid"></div></div>
+        <p class="muted">Jour / semaine / mois par logement : réservations, arrivées, départ, blocage, maintenance, ménage. Synchronisation iCal / Airbnb / Booking / Expedia via la page Canaux.</p>
+      </section>
+
+      <!-- RESERVATIONS -->
+      <section id="view-reservations" class="view">
+        <div class="view-head"><h3>Gérer les réservations</h3><button class="btn-add" data-new="reservation"><i class="fas fa-plus"></i> Nouvelle</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Voyageur</th><th>Bien</th><th>Dates</th><th>Statut</th><th>Montant</th><th>Actions</th></tr></thead><tbody id="resBody"></tbody></table></div>
+      </section>
+
+      <!-- VOYAGEURS -->
+      <section id="view-travelers" class="view">
+        <div class="view-head"><h3>Voyageurs</h3><button class="btn-add" data-new="traveler"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Pays</th><th>Dernière visite</th><th>Actions</th></tr></thead><tbody id="travelerBody"></tbody></table></div>
+      </section>
+
+      <!-- REVENUS -->
+      <section id="view-revenue" class="view">
+        <div class="view-head"><h3>Revenus & paiements</h3></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-euro-sign"></i></div><div><strong id="revTotal">0</strong><span>Total DH</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div><div><strong id="revThisMonth">0</strong><span>Ce mois</span></div></div>
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-coins"></i></div><div><strong id="revPaid">0</strong><span>Payés</span></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-clock"></i></div><div><strong id="revPending">0</strong><span>En attente</span></div></div>
+        </div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Voyageur</th><th>Bien</th><th>Montant</th><th>Dates</th><th>Paiement</th><th>Facture</th></tr></thead><tbody id="revBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Brut, commissions, frais, dépenses et montant propriétaire : Stripe non connecté — configuration requise pour les paiements en ligne.</p>
+      </section>
+
+      <!-- MENAGE -->
+      <section id="view-cleaning" class="view">
+        <div class="view-head"><h3>Ménage & interventions</h3><button class="btn-add" data-new="cleaning"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Date</th><th>Type</th><th>Durée</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="cleanBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Statuts : À faire · Assigné · En cours · Terminé · Problème. Photos avant/après, commentaire, coût et facture : via la fiche tâche.</p>
+      </section>
+
+      <!-- MAINTENANCE -->
+      <section id="view-maintenance" class="view">
+        <div class="view-head"><h3>Maintenance</h3><button class="btn-add" data-new="maintenance"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Problème</th><th>Priorité</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="maintBody"></tbody></table></div>
+      </section>
+
+      <!-- ACCES -->
+      <section id="view-access" class="view">
+        <div class="view-head"><h3>Accès & équipements</h3><button class="btn-add" data-new="access"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Type</th><th>Code / Réf.</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="accessBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Serrures connectées Tuya : « Connexion requise » tant que l'API/appareil n'est pas configuré — aucun faux contrôle.</p>
+      </section>
+
+      <!-- CONFORMITE -->
+      <section id="view-compliance" class="view">
+        <div class="view-head"><h3>Conformité</h3></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div><strong id="compOk">0</strong><span>Conformes</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-clock"></i></div><div><strong id="compPending">0</strong><span>En attente</span></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-exclamation-triangle"></i></div><div><strong id="compWarn">0</strong><span>Warnings</span></div></div>
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-file-contract"></i></div><div><strong id="compDocs">0</strong><span>Documents</span></div></div>
+        </div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Licence</th><th>Assurance</th><th>Contrôle</th><th>Prochain</th><th>Statut</th></tr></thead><tbody id="compBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Statuts 🟠 Vérification nécessaire / 🔴 Document manquant. L'IA indique « Vérification humaine nécessaire » dès qu'une obligation juridique n'est pas certaine. Aucune règle légale n'est inventée.</p>
+      </section>
+
+      <!-- CANAUX -->
+      <section id="view-channels" class="view">
+        <div class="view-head"><h3>Canaux & connexions</h3><button class="btn-add" data-new="channel"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Plateforme</th><th>Type</th><th>Identifiant</th><th>État</th><th>Sync</th><th>Dernier log</th><th>Actions</th></tr></thead><tbody id="chanBody"></tbody></table></div>
+        <div class="card" style="margin-top:16px;"><h3>Journal de synchronisation</h3><div id="chanLogs"><p class="muted">Aucun journal.</p></div></div>
+        <div class="card"><h3>Webhooks</h3><div class="table-wrap"><table class="dash-table"><thead><tr><th>Endpoint</th><th>Événement</th><th>État</th><th>Toggle</th><th>Action</th></tr></thead><tbody id="webhookBody"></tbody></table></div></div>
+        <p class="muted" style="padding-top:8px;">Chaque connecteur est isolé : une panne n'arrête pas les autres. Aucune clé API / secret n'est affiché en clair.</p>
+      </section>
+
+      <!-- AI MANAGER -->
+      <section id="view-ai-manager" class="view">
+        <div class="view-head"><h3>AI Property Manager</h3></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-robot"></i></div><div><strong id="aiRequests">0</strong><span>Requêtes/jour</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-brain"></i></div><div><strong id="aiAccuracy">—</strong><span>Précision</span></div></div>
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-list-check"></i></div><div><strong id="aiTasks">0</strong><span>Tâches auto</span></div></div>
+        </div>
+        <div class="card"><h3>Statut IA</h3><div id="aiStatus"><p class="muted">IA non connectée.</p></div></div>
+        <div class="card">
+          <h3>Generer du contenu</h3>
+          <div class="field"><label>Type</label><select id="aiGenType"><option value="description">Description bien</option><option value="social">Post réseaux</option><option value="email">Email voyageur</option></select></div>
+          <button class="btn-save" id="aiGenBtn"><i class="fas fa-wand-magic-sparkles"></i> Generer</button>
+          <div id="aiGenResult" class="muted" style="margin-top:12px;"></div>
+        </div>
+        <div class="card"><h3>Niveaux d’autorisation IA</h3>
+          <p><span class="status-badge confirmed">🟢 Automatique</span> Actions sans validation lorsque le risque est faible.</p>
+          <p style="margin-top:8px;"><span class="status-badge in-progress">🟠 Validation</span> L’IA prépare l’action mais demande l’autorisation.</p>
+          <p style="margin-top:8px;"><span class="status-badge cancelled">🔴 Humain obligatoire</span> Juridique, litiges, remboursements importants, contrat, sensible.</p>
+        </div>
+      </section>
+
+      <!-- DOCUMENTS -->
+      <section id="view-documents" class="view">
+        <div class="view-head"><h3>Documents</h3><button class="btn-add" data-new="document"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Action</th></tr></thead><tbody id="docBody"></tbody></table></div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="view-notifications" class="view">
+        <div class="view-head"><h3>Notifications</h3><button class="btn-add" id="notifReadAll"><i class="fas fa-check-double"></i> Tout lire</button></div>
+        <div id="notifList"></div>
+      </section>
+
+      <!-- RAPPORTS -->
+      <section id="view-reports" class="view">
+        <div class="view-head"><h3>Rapports</h3></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-chart-bar"></i></div><div><strong id="repVues">0</strong><span>Vues totales</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div><strong id="repVisiteurs">0</strong><span>Visiteurs</span></div></div>
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-euro-sign"></i></div><div><strong id="repRev">0 MAD</strong><span>Revenu</span></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-arrow-up"></i></div><div><strong id="repTaux">0%</strong><span>Taux conversion</span></div></div>
+        </div>
+        <p class="muted">Rapports propriétaires : biens, réservations, revenus, dépenses, interventions — exportables par propriétaire.</p>
+      </section>
+
+      <!-- AUTOMATISATIONS -->
+      <section id="view-automations" class="view">
+        <div class="view-head"><h3>Automatisations</h3><button class="btn-add" data-new="automation"><i class="fas fa-plus"></i> Créer</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Déclencheur</th><th>Action</th><th>Actif</th><th>Dernier exec.</th><th>Actions</th></tr></thead><tbody id="autoBody"></tbody></table></div>
+      </section>
+
+      <!-- PROPRIETAIRES -->
+      <section id="view-owners" class="view">
+        <div class="view-head"><h3>Propriétaires</h3><button class="btn-add" data-new="owner"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Biens</th><th>Commission</th><th>Actions</th></tr></thead><tbody id="ownerBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Chaque propriétaire dispose d’un espace dédié : uniquement ses biens, réservations, revenus, rapports et documents.</p>
+      </section>
+
+      <!-- PRESTATAIRES -->
+      <section id="view-prestataires" class="view">
+        <div class="view-head"><h3>Prestataires</h3><button class="btn-add" data-new="prestataire"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Métier</th><th>Téléphone</th><th>Email</th><th>Tâches</th><th>Actions</th></tr></thead><tbody id="provBody"></tbody></table></div>
+      </section>
+
+      <!-- TARIFICATION -->
+      <section id="view-pricing" class="view">
+        <div class="view-head"><h3>Tarification</h3><button class="btn-add" data-new="pricing"><i class="fas fa-plus"></i> Ajouter</button></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Prix actuel</th><th>Recommandé</th><th>Min</th><th>Max</th><th>Saison</th><th>Décision</th></tr></thead><tbody id="priceBody"></tbody></table></div>
+        <div class="card" style="margin-top:16px;"><h3>Analyse IA</h3><p id="priceAiNote" class="muted"></p></div>
+      </section>
+
+      <!-- JOURNAL AUDIT -->
+      <section id="view-audit" class="view">
+        <div class="view-head"><h3>Journal d’activité</h3></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Utilisateur</th><th>Action</th><th>Objet</th><th>Ancienne valeur</th><th>Nouvelle valeur</th><th>Date</th></tr></thead><tbody id="auditBody"></tbody></table></div>
+      </section>
+
+      <!-- ROLES -->
+      <section id="view-roles" class="view">
+        <div class="view-head"><h3>Rôles & permissions</h3></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Rôle</th><th>Permissions</th><th>Éditer</th></tr></thead><tbody id="roleBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Rôles : Admin DarMaroc · Gestionnaire · Propriétaire · Prestataire · Lecteur/Support. L’admin peut modifier les permissions.</p>
       </section>
 
     </div>

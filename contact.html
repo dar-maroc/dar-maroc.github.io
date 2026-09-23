@@ -375,6 +375,22 @@
 <script defer src="utils/ai.js"></script>
 <script defer src="utils/stats.js"></script>
   <script defer src="js/main.js"></script>
+  <script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var objet = params.get("objet");
+    if (!objet) return;
+    var msg = document.getElementById("formMessage");
+    if (!msg) return;
+    if (objet === "confier") {
+      msg.value = "Bonjour DarMaroc, je souhaite confier mon bien à votre service de gestion et conciergerie.\n\nType de bien :\nVille :\nNombre de logements :\nDisponibilité :";
+    } else if (objet === "estimation") {
+      msg.value = "Bonjour DarMaroc, je souhaite demander une estimation pour mon bien.\n\nType de bien :\nVille :\nSurface :\nDescription :";
+    }
+    msg.focus();
+    window.scrollTo({ top: msg.getBoundingClientRect().top + window.scrollY - 80, behavior: "smooth" });
+  })();
+  </script>
 </body>
 </html>
 

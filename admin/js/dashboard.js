@@ -1044,6 +1044,19 @@
   }
 
   function submitForm() {
+    if (modalForm._type === 'entity' && modalForm._save) {
+      var vals = {};
+      (ENTITY_FORMS[modalForm._entity] || { fields: [] }).fields.forEach(function (f) { vals[f.id] = getVal(f.id); });
+      var missing = (ENTITY_FORMS[modalForm._entity] || { fields: [] }).fields.filter(function (f) { return f.required && !String(vals[f.id] || '').trim(); });
+      if (missing.length) { toast('Champ obligatoire : ' + missing[0].label, true); return; }
+      modalForm._save(vals);
+      saveLocal();
+      closeModal();
+      renderAllExtended();
+      toast((ENTITY_FORMS[modalForm._entity] || {}).title + ' enregistré.');
+      modalForm._save = null;
+      return;
+    }
     var type = modalForm._type;
     var index = modalForm._index;
     if (type === 'user') { submitUserForm(); return; }
@@ -1159,12 +1172,9 @@
   document.querySelector('.sidebar-nav').addEventListener('click', function (e) {
     var link = e.target.closest('.nav-link');
     if (!link) return;
-    document.querySelectorAll('.nav-link').forEach(function (l) { l.classList.remove('active'); });
-    link.classList.add('active');
-    document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
-    document.getElementById('view-' + link.dataset.view).classList.add('active');
-    var titles = { overview: 'Aperçu', stats: 'Statistiques', properties: 'Biens', showcase: 'Démonstration', partners: 'Partenaires', services: 'Services', categories: 'Catégories', testimonials: 'Témoignages', faq: 'FAQ', contacts: 'Contacts', settings: 'Réglages', users: 'Utilisateurs' };
-    document.getElementById('viewTitle').textContent = titles[link.dataset.view] || 'Aperçu';
+    e.preventDefault();
+    var view = link.getAttribute('data-view');
+    if (view) switchView(view);
     document.getElementById('sidebar').classList.remove('open');
   });
 
@@ -1189,6 +1199,129 @@
     });
   }
 
+  /* ---------- Formulaires nouvelles entites ---------- */
+  var ENTITY_FORMS = {
+    reservation: { title: 'Reservation', fields: [
+      { id: 'eTraveler', label: 'Voyageur', required: true },
+      { id: 'eProperty', label: 'Logement', required: true },
+      { id: 'eDates', label: 'Dates (AAAA-MM-JJ - AAAA-MM-JJ)', required: true },
+      { id: 'eAmount', label: 'Montant (DH)', type: 'number' },
+      { id: 'eStatus', label: 'Statut', type: 'select', options: [{v:'pending',l:'En attente'},{v:'confirmed',l:'Confirmee'},{v:'cancelled',l:'Annulee'}] }
+    ], save: function (v) { reservations.unshift({ id: uid(), traveler: v.eTraveler, property: v.eProperty, dates: v.eDates, status: v.eStatus || 'pending', amount: v.eAmount || '0' }); logAudit('Reservation', 'Creation', '', v.eTraveler); persistOps(); } },
+    traveler: { title: 'Voyageur', fields: [
+      { id: 'eName', label: 'Nom', required: true },
+      { id: 'eEmail', label: 'Email', type: 'email' },
+      { id: 'ePhone', label: 'Telephone' },
+      { id: 'eCountry', label: 'Pays' }
+    ], save: function (v) { travelers.unshift({ name: v.eName, email: v.eEmail, phone: v.ePhone, country: v.eCountry, lastVisit: '' }); logAudit('Voyageur', 'Creation', '', v.eName); persistOps(); } },
+    cleaning: { title: 'Menage', fields: [
+      { id: 'eProperty', label: 'Logement', required: true },
+      { id: 'eDate', label: 'Date', type: 'date', required: true },
+      { id: 'eType', label: 'Type', type: 'select', options: [{v:'Complet',l:'Complet'},{v:'Partiel',l:'Partiel'},{v:'Sortie',l:'Depart'},{v:'Arrivee',l:'Arrivee'}] },
+      { id: 'eDuration', label: 'Duree' },
+      { id: 'eStatus', label: 'Statut', type: 'select', options: [{v:'pending',l:'A faire'},{v:'in-progress',l:'En cours'},{v:'confirmed',l:'Termine'},{v:'cancelled',l:'Probleme'}] }
+    ], save: function (v) { cleanings.unshift({ property: v.eProperty, date: v.eDate, type: v.eType, duration: v.eDuration, status: v.eStatus || 'pending' }); logAudit('Menage', 'Creation', '', v.eProperty + ' ' + v.eDate); persistOps(); } },
+    maintenance: { title: 'Maintenance', fields: [
+      { id: 'eProperty', label: 'Logement', required: true },
+      { id: 'eIssue', label: 'Probleme', required: true },
+      { id: 'ePriority', label: 'Priorite', type: 'select', options: [{v:'high',l:'Haute'},{v:'medium',l:'Moyenne'},{v:'low',l:'Basse'}] },
+      { id: 'eDate', label: 'Date', type: 'date' },
+      { id: 'eStatus', label: 'Statut', type: 'select', options: [{v:'pending',l:'A faire'},{v:'in-progress',l:'En cours'},{v:'confirmed',l:'Termine'}] }
+    ], save: function (v) { maintenances.unshift({ property: v.eProperty, issue: v.eIssue, priority: v.ePriority || 'medium', date: v.eDate, status: v.eStatus || 'pending' }); logAudit('Maintenance', 'Creation', '', v.eIssue); persistOps(); } },
+    access: { title: 'Acces', fields: [
+      { id: 'eProperty', label: 'Logement', required: true },
+      { id: 'eType', label: 'Type', type: 'select', options: [{v:'Code',l:'Code'},{v:'Cle',l:'Cle'},{v:'Badge',l:'Badge'},{v:'Tuya',l:'Serrure connectee'}] },
+      { id: 'eCode', label: 'Code / Reference' },
+      { id: 'eDate', label: 'Date', type: 'date' },
+      { id: 'eStatus', label: 'Statut', type: 'select', options: [{v:'active',l:'Actif'},{v:'pending',l:'Temporaire'},{v:'cancelled',l:'Inactif'}] }
+    ], save: function (v) { accesses.unshift({ property: v.eProperty, type: v.eType, code: v.eCode, date: v.eDate, status: v.eStatus || 'active' }); logAudit('Acces', 'Creation', '', v.eProperty); persistOps(); } },
+    owner: { title: 'Proprietaire', fields: [
+      { id: 'eName', label: 'Nom', required: true },
+      { id: 'eEmail', label: 'Email', type: 'email' },
+      { id: 'ePhone', label: 'Telephone' },
+      { id: 'eProps', label: 'Nombre de biens', type: 'number' },
+      { id: 'eComm', label: 'Commission (%)', type: 'number' }
+    ], save: function (v) { owners.unshift({ name: v.eName, email: v.eEmail, phone: v.ePhone, props: v.eProps || 0, commission: (v.eComm || 0) + '%' }); logAudit('Proprietaire', 'Creation', '', v.eName); persistOps(); } },
+    document: { title: 'Document', fields: [
+      { id: 'eName', label: 'Nom du fichier', required: true },
+      { id: 'eType', label: 'Type', type: 'select', options: [{v:'PDF',l:'PDF'},{v:'IMG',l:'Image'},{v:'DOC',l:'Document'}] },
+      { id: 'eSize', label: 'Taille' }
+    ], save: function (v) { documents.unshift({ name: v.eName, type: v.eType || 'PDF', size: v.eSize || '-', date: new Date().toISOString().slice(0, 10) }); logAudit('Document', 'Ajout', '', v.eName); persistOps(); } },
+    prestataire: { title: 'Prestataire', fields: [
+      { id: 'eName', label: 'Nom / Societe', required: true },
+      { id: 'eTrade', label: 'Metier', required: true },
+      { id: 'ePhone', label: 'Telephone' },
+      { id: 'eEmail', label: 'Email', type: 'email' }
+    ], save: function (v) { providers.unshift({ name: v.eName, trade: v.eTrade, phone: v.ePhone, email: v.eEmail, tasks: 0 }); logAudit('Prestataire', 'Creation', '', v.eName); persistOps(); } },
+    automation: { title: 'Automatisation', fields: [
+      { id: 'eTrigger', label: 'Declencheur', required: true },
+      { id: 'eAction', label: 'Action', required: true }
+    ], save: function (v) { automations.unshift({ trigger: v.eTrigger, action: v.eAction, active: true, last: '-' }); logAudit('Automatisation', 'Creation', '', v.eTrigger); persistOps(); } },
+    pricing: { title: 'Tarification', fields: [
+      { id: 'eProperty', label: 'Logement', required: true },
+      { id: 'eCurrent', label: 'Prix actuel (DH)', required: true },
+      { id: 'eMin', label: 'Minimum' },
+      { id: 'eMax', label: 'Maximum' },
+      { id: 'eSeason', label: 'Saison' }
+    ], save: function (v) { pricing.unshift({ property: v.eProperty, current: v.eCurrent, recommended: '', min: v.eMin, max: v.eMax, season: v.eSeason }); logAudit('Tarification', 'Creation', '', v.eProperty); persistOps(); } },
+    channel: { title: 'Canal', fields: [
+      { id: 'ePlatform', label: 'Plateforme', required: true },
+      { id: 'eTypeC', label: 'Type', type: 'select', options: [{v:'OTA',l:'OTA'},{v:'Paiement',l:'Paiement'},{v:'IoT',l:'IoT'},{v:'Calendar',l:'Calendrier'},{v:'Pricing',l:'Tarification'},{v:'API',l:'API'},{v:'Webhook',l:'Webhook'},{v:'Messaging',l:'Messagerie'}] },
+      { id: 'eId', label: 'Identifiant public (jamais de secret)' }
+    ], save: function (v) { channels.push({ platform: v.ePlatform, type: v.eTypeC, id: v.eId, connected: false, sync: 'Non connecte', color: '#D4AF37', lastSync: '-', error: 'Configuration requise' }); logAudit('Canal', 'Ajout', '', v.ePlatform); persistOps(); } },
+    'calendar-event': { title: 'Evenement calendrier', fields: [
+      { id: 'eTitle', label: 'Titre', required: true },
+      { id: 'eDate', label: 'Date', type: 'date', required: true },
+      { id: 'eKind', label: 'Type', type: 'select', options: [{v:'reservation',l:'Reservation'},{v:'arrival',l:'Arrivee'},{v:'departure',l:'Depart'},{v:'block',l:'Blocage'},{v:'maintenance',l:'Maintenance'},{v:'cleaning',l:'Menage'}] }
+    ], save: function (v) { notifications.unshift({ icon: 'fa-calendar', text: 'Evenement : ' + v.eTitle + ' (' + v.eDate + ')', time: 'a l\u2019instant', unread: true }); logAudit('Calendrier', 'Evenement', '', v.eTitle); persistOps(); } }
+  };
+
+  function newEntityForm(type, index) {
+    var cfgE = ENTITY_FORMS[type];
+    if (!cfgE) { openModal('Ajouter', '<div class="muted">Formulaire non disponible pour : ' + esc(type) + '.</div>'); modalForm._type = ''; return; }
+    var html = cfgE.fields.map(function (f) {
+      if (f.type === 'select') return field(f.label, f.id, (f.options[0] || {}).v, { type: 'select', options: f.options });
+      return field(f.label, f.id, '', { type: f.type || 'text' });
+    }).join('');
+    openModal((index >= 0 ? 'Modifier ' : 'Ajouter ') + cfgE.title, html);
+    modalForm._type = 'entity';
+    modalForm._entity = type;
+    modalForm._index = index;
+    modalForm._save = cfgE.save;
+  }
+
+  /* Persist operational data (reservations, tasks, etc.) */
+  var OPS_KEY = 'darmaroc-ops-data-v1';
+  function persistOps() {
+    try {
+      localStorage.setItem(OPS_KEY, JSON.stringify({
+        reservations: reservations, travelers: travelers, cleanings: cleanings,
+        maintenances: maintenances, accesses: accesses, documents: documents,
+        owners: owners, notifications: notifications, automations: automations,
+        providers: providers, pricing: pricing, channels: channels
+      }));
+    } catch (e) {}
+  }
+  function loadOps() {
+    try {
+      var raw = localStorage.getItem(OPS_KEY);
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      if (o.reservations) reservations = o.reservations;
+      if (o.travelers) travelers = o.travelers;
+      if (o.cleanings) cleanings = o.cleanings;
+      if (o.maintenances) maintenances = o.maintenances;
+      if (o.accesses) accesses = o.accesses;
+      if (o.documents) documents = o.documents;
+      if (o.owners) owners = o.owners;
+      if (o.notifications) notifications = o.notifications;
+      if (o.automations) automations = o.automations;
+      if (o.providers) providers = o.providers;
+      if (o.pricing) pricing = o.pricing;
+      if (o.channels) channels = o.channels;
+    } catch (e) {}
+  }
+
   document.querySelectorAll('[data-new]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       if (btn.dataset.new === 'service') serviceForm(-1);
@@ -1200,6 +1333,7 @@
       else if (btn.dataset.new === 'property') propertyForm(-1);
       else if (btn.dataset.new === 'contact') contactForm(-1);
       else if (btn.dataset.new === 'user') userForm(-1);
+      else newEntityForm(btn.dataset.new, -1);
     });
   });
 
@@ -1436,6 +1570,7 @@
       window.DarMarocStore.pushSettings(DB.settings);
     }
     toast('Réglages enregistrés.');
+    if (typeof logAudit === 'function') logAudit('Paramètres', 'Modification', '', 'mis à jour');
   });
 
   document.getElementById('passForm').addEventListener('submit', function (e) {
@@ -1455,6 +1590,7 @@
         });
       }
       toast('Mot de passe mis à jour.');
+      logAudit('Sécurité', 'Changement mot de passe', '***', '***');
       document.getElementById('newPass').value = '';
     });
   });
@@ -1523,10 +1659,7 @@
   }
 
   /* RESERVATIONS */
-  var reservations = [
-    { id: 'res1', traveler: 'Ahmed Benali', property: 'Villa Casablanca', dates: '2026-01-15 - 2026-01-22', status: 'confirmed', amount: '4,500 DH' },
-    { id: 'res2', traveler: 'Fatima El Mansouri', property: 'Appartement Rabat', dates: '2026-02-01 - 2026-02-07', status: 'pending', amount: '2,800 DH' }
-  ];
+  var reservations = [];
   function renderReservations() {
     var body = document.getElementById('resBody');
     if (!body) return;
@@ -1537,10 +1670,7 @@
   }
 
   /* VOYAGEURS */
-  var travelers = [
-    { name: 'Ahmed Benali', email: 'ahmed@email.com', phone: '+212 661 234 567', country: 'Maroc', lastVisit: '2025-12-15' },
-    { name: 'Sophie Martin', email: 'sophie@email.fr', phone: '+33 6 12 34 56 78', country: 'France', lastVisit: '2025-11-20' }
-  ];
+  var travelers = [];
   function renderTravelers() {
     var body = document.getElementById('travelerBody');
     if (!body) return;
@@ -1552,31 +1682,31 @@
 
   /* REVENUS */
   function renderRevenue() {
-    var total = document.getElementById('revTotal');
-    var thisMonth = document.getElementById('revThisMonth');
-    var paid = document.getElementById('revPaid');
-    var pending = document.getElementById('revPending');
+    var total = 0, paid = 0, pending = 0, month = 0;
+    var now = new Date();
+    var ym = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2);
+    reservations.forEach(function (r) {
+      var amt = Number(String(r.amount || '').replace(/[^0-9.]/g, '')) || 0;
+      total += amt;
+      if (r.status === 'confirmed' || r.status === 'paid') paid += amt; else pending += amt;
+      if ((r.dates || '').indexOf(ym) === 0) month += amt;
+    });
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    set('revTotal', total.toLocaleString('fr-FR'));
+    set('revThisMonth', month.toLocaleString('fr-FR'));
+    set('revPaid', paid.toLocaleString('fr-FR'));
+    set('revPending', pending.toLocaleString('fr-FR'));
     var body = document.getElementById('revBody');
-    if (total) total.textContent = '12,450';
-    if (thisMonth) thisMonth.textContent = '5,200';
-    if (paid) paid.textContent = '9,800';
-    if (pending) pending.textContent = '2,650';
     if (body) {
-      var revs = [
-        { client: 'Ahmed Benali', amount: '4,500 DH', date: '2026-01-10', pay: 'paid' },
-        { client: 'Fatima El Mansouri', amount: '2,800 DH', date: '2026-01-12', pay: 'pending' }
-      ];
-      body.innerHTML = revs.map(function(r) {
-        return '<tr><td>' + esc(r.client) + '</td><td>' + r.amount + '</td><td>' + r.date + '</td><td><span class="status-badge ' + r.pay + '">' + r.pay + '</span></td><td><button class="btn-icon"><i class="fas fa-file-invoice"></i></button></td></tr>';
-      }).join('') || '<tr><td colspan="6" class="muted">Aucun revenu.</td></tr>';
+      body.innerHTML = reservations.map(function (r, i) {
+        return '<tr><td>' + esc(r.traveler || '—') + '</td><td>' + esc(r.property || '—') + '</td><td>' + esc(r.amount || '0') + '</td><td>' + esc(r.dates || '—') + '</td><td><span class="status-badge ' + (r.status === 'confirmed' || r.status === 'paid' ? 'confirmed' : 'pending') + '">' + esc(r.status || 'pending') + '</span></td>' +
+          '<td><button class="btn-icon"><i class="fas fa-file-invoice"></i></button></td></tr>';
+      }).join('') || '<tr><td colspan="6" class="muted">Aucun revenu enregistré (0 MAD).</td></tr>';
     }
   }
 
   /* MENAGE */
-  var cleanings = [
-    { property: 'Villa Casablanca', date: '2026-01-14', type: 'Complet', duration: '3h', status: 'confirmed' },
-    { property: 'Appartement Rabat', date: '2026-01-16', type: 'Partiel', duration: '1h30', status: 'pending' }
-  ];
+  var cleanings = [];
   function renderCleanings() {
     var body = document.getElementById('cleanBody');
     if (!body) return;
@@ -1587,10 +1717,7 @@
   }
 
   /* MAINTENANCE */
-  var maintenances = [
-    { property: 'Villa Marrakech', issue: 'Fuite eau cuisine', priority: 'high', date: '2026-01-10', status: 'in-progress' },
-    { property: 'Riad Fes', issue: 'Climatisation', priority: 'medium', date: '2026-01-12', status: 'pending' }
-  ];
+  var maintenances = [];
   function renderMaintenances() {
     var body = document.getElementById('maintBody');
     if (!body) return;
@@ -1601,10 +1728,7 @@
   }
 
   /* ACCES */
-  var accesses = [
-    { property: 'Villa Casablanca', type: 'Code', code: '7429', date: '2026-01-01', status: 'active' },
-    { property: 'Appartement Rabat', type: 'Clé', code: '—', date: '2026-01-05', status: 'active' }
-  ];
+  var accesses = [];
   function renderAccesses() {
     var body = document.getElementById('accessBody');
     if (!body) return;
@@ -1616,37 +1740,90 @@
 
   /* CONFORMITÉ */
   function renderCompliance() {
-    var ok = document.getElementById('compOk');
-    var pending = document.getElementById('compPending');
-    var warn = document.getElementById('compWarn');
-    var docs = document.getElementById('compDocs');
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    set('compOk', '0'); set('compPending', '0'); set('compWarn', '0'); set('compDocs', String(documents.length));
     var body = document.getElementById('compBody');
-    if (ok) ok.textContent = '3';
-    if (pending) pending.textContent = '1';
-    if (warn) warn.textContent = '1';
-    if (docs) docs.textContent = '8';
-    if (body) {
-      body.innerHTML = '<tr><td>Villa Casablanca</td><td><span class="status-badge confirmed">OK</span></td><td><span class="status-badge confirmed">OK</span></td><td>2026-03-01</td><td>2026-03-01</td><td><span class="status-badge confirmed">Conforme</span></td></tr>' +
-        '<tr><td>Appartement Rabat</td><td><span class="status-badge pending">En attente</span></td><td><span class="status-badge confirmed">OK</span></td><td>2025-12-15</td><td>2025-12-15</td><td><span class="status-badge pending">A revoir</span></td></tr>' +
-        '<tr><td>Riad Fes</td><td><span class="status-badge confirmed">OK</span></td><td><span class="status-badge pending">En attente</span></td><td>2026-01-20</td><td>2026-02-20</td><td><span class="status-badge in-progress">Warning</span></td></tr>';
-    }
+    if (body) body.innerHTML = owners.length || documents.length
+      ? '<tr><td colspan="6" class="muted">Aucune vérification de conformité enregistrée. Ajoutez les documents de chaque bien.</td></tr>'
+      : '<tr><td colspan="6" class="muted">Aucune donnée de conformité. Vérification humaine nécessaire pour toute obligation légale.</td></tr>';
   }
 
   /* CANAUX */
   var channels = [
-    { platform: 'WhatsApp Business', type: 'Messaging', id: '+212 522 261 486', connected: true, sync: 'synced' },
-    { platform: 'Booking.com', type: 'OTA', id: 'darmaroc-bk', connected: true, sync: 'synced' },
-    { platform: 'Airbnb', type: 'OTA', id: 'darmaroc-ab', connected: false, sync: 'none' }
+    { platform: 'WhatsApp Business', type: 'Messaging', id: '+212 522 261 486', connected: true, sync: 'Actif', color: '#25D366', lastSync: '—', error: '' },
+    { platform: 'Airbnb', type: 'OTA', id: '', connected: false, sync: 'Non connecté', color: '#FF5A5F', lastSync: '—', error: 'Configuration requise (API/partenaire)' },
+    { platform: 'Booking.com', type: 'OTA', id: '', connected: false, sync: 'Non connecté', color: '#003580', lastSync: '—', error: 'Configuration requise (API/partenaire)' },
+    { platform: 'Expedia', type: 'OTA', id: '', connected: false, sync: 'Non connecté', color: '#1B4D8F', lastSync: '—', error: 'Configuration requise (API/partenaire)' },
+    { platform: 'iCal', type: 'Calendar', id: '', connected: false, sync: 'Non connecté', color: '#E91E63', lastSync: '—', error: 'URL iCal à fournir' },
+    { platform: 'PriceLabs', type: 'Pricing', id: '', connected: false, sync: 'Non connecté', color: '#7C3AED', lastSync: '—', error: 'Configuration requise (API)' },
+    { platform: 'Stripe', type: 'Paiement', id: '', connected: false, sync: 'Non connecté', color: '#635BFF', lastSync: '—', error: 'Configuration requise (clés Stripe)' },
+    { platform: 'Tuya Smart', type: 'IoT', id: '', connected: false, sync: 'Non connecté', color: '#009688', lastSync: '—', error: 'Connexion requise (appareils Tuya)' },
+    { platform: 'Webhook', type: 'Webhook', id: '', connected: false, sync: 'Non connecté', color: '#8B5CF6', lastSync: '—', error: 'Endpoint à configurer' },
+    { platform: 'REST API', type: 'API', id: '', connected: false, sync: 'Non connecté', color: '#FF6B35', lastSync: '—', error: 'Configuration requise' }
   ];
+  var channelLogs = [];
+  function logChannel(name, msg) {
+    channelLogs.unshift({ t: new Date().toLocaleString('fr-FR'), name: name, msg: msg });
+    if (channelLogs.length > 50) channelLogs.pop();
+    logAudit('Canal', name, '', msg);
+  }
   function renderChannels() {
     var body = document.getElementById('chanBody');
     if (!body) return;
-    body.innerHTML = channels.map(function(c) {
+    body.innerHTML = channels.map(function(c, i) {
       var connClass = c.connected ? 'chan-connected' : 'chan-disconnected';
-      var connLabel = c.connected ? 'Oui' : 'Non';
-      return '<tr><td>' + esc(c.platform) + '</td><td>' + esc(c.type) + '</td><td>' + esc(c.id) + '</td><td class="' + connClass + '">' + connLabel + '</td><td>' + c.sync + '</td>' +
-        '<td><div class="row-actions"><button class="btn-icon"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
-    }).join('') || '<tr><td colspan="6" class="muted">Aucun canal.</td></tr>';
+      var connLabel = c.connected ? 'Connecté' : 'Non connecté';
+      var icon = c.connected ? 'fa-circle-check' : 'fa-circle-xmark';
+      var iconFa = c.type === 'Messaging' ? 'comment-dots' : c.type === 'OTA' ? 'plane' : c.type === 'Paiement' ? 'credit-card' : c.type === 'IoT' ? 'lightbulb' : c.type === 'API' ? 'code' : c.type === 'Webhook' ? 'link' : c.type === 'Pricing' ? 'tags' : 'calendar';
+      return '<tr><td><i class="fas fa-' + iconFa + '" style="color:' + (c.color || 'var(--gold)') + ';margin-right:8px;"></i> ' + esc(c.platform) + '</td>' +
+        '<td>' + esc(c.type) + '</td>' +
+        '<td>' + (c.id ? '<code style="font-size:0.8rem;">' + esc(c.id) + '</code>' : '<span class="muted">—</span>') + '</td>' +
+        '<td class="' + connClass + '"><i class="fas ' + icon + '"></i> ' + connLabel + '</td>' +
+        '<td>' + esc(c.sync) + '</td>' +
+        '<td class="muted" style="font-size:0.78rem;">' + esc(c.error || c.lastSync || '—') + '</td>' +
+        '<td><div class="row-actions">' +
+        (c.connected
+          ? '<button class="btn-icon" data-chdis="' + i + '" title="Déconnecter"><i class="fas fa-link-slash"></i></button>'
+          : '<button class="btn-icon" data-chcon="' + i + '" title="Connecter"><i class="fas fa-plug"></i></button>') +
+        '<button class="btn-icon" data-chtest="' + i + '" title="Tester"><i class="fas fa-vial"></i></button>' +
+        '<button class="btn-icon" data-chsync="' + i + '" title="Synchroniser"><i class="fas fa-rotate"></i></button>' +
+        '</div></td></tr>';
+    }).join('') || '<tr><td colspan="7" class="muted">Aucun canal.</td></tr>';
+    var logs = document.getElementById('chanLogs');
+    if (logs) {
+      logs.innerHTML = channelLogs.length
+        ? channelLogs.map(function(l) { return '<div class="notif-item"><i class="fas fa-terminal notif-icon" style="color:var(--gold);"></i><div class="notif-text"><strong>' + esc(l.name) + '</strong> — ' + esc(l.msg) + '</div><div class="notif-time">' + esc(l.t) + '</div></div>'; }).join('')
+        : '<p class="muted">Aucun journal de synchronisation.</p>';
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var t;
+    if ((t = e.target.closest('[data-chcon]'))) {
+      var ic = channels[+t.getAttribute('data-chcon')];
+      ic.connected = true; ic.sync = 'Connecté'; ic.error = ''; ic.lastSync = new Date().toLocaleString('fr-FR');
+      logChannel(ic.platform, 'Connecté (configuration manuelle). Secrets non affichés.');
+      renderChannels(); toast(ic.platform + ' marqué connecté.');
+    } else if ((t = e.target.closest('[data-chdis]'))) {
+      var id = channels[+t.getAttribute('data-chdis')];
+      id.connected = false; id.sync = 'Non connecté'; id.lastSync = '—';
+      logChannel(id.platform, 'Déconnecté.');
+      renderChannels(); toast(id.platform + ' déconnecté.');
+    } else if ((t = e.target.closest('[data-chtest]'))) {
+      var it = channels[+t.getAttribute('data-chtest')];
+      if (!it.connected) { toast(it.platform + ' : non connecté — ' + (it.error || 'configuration requise') + '.', true); logChannel(it.platform, 'Test échoué : non connecté.'); }
+      else { toast('Test ' + it.platform + ' : OK.'); logChannel(it.platform, 'Test réussi.'); }
+      renderChannels();
+    } else if ((t = e.target.closest('[data-chsync]'))) {
+      var is = channels[+t.getAttribute('data-chsync')];
+      if (!is.connected) { toast(is.platform + ' : synchronisation impossible (non connecté).', true); logChannel(is.platform, 'Sync refusée : non connecté.'); }
+      else { is.lastSync = new Date().toLocaleString('fr-FR'); is.sync = 'Synchronisé'; toast('Synchronisation ' + is.platform + ' effectuée.'); logChannel(is.platform, 'Synchronisation OK.'); }
+      renderChannels();
+    }
+  });
+
+  function testConnection(platform) {
+    toast('Test connexion ' + platform + '...');
   }
 
   /* AI MANAGER */
@@ -1655,36 +1832,55 @@
     var acc = document.getElementById('aiAccuracy');
     var tasks = document.getElementById('aiTasks');
     var status = document.getElementById('aiStatus');
-    if (req) req.textContent = '47';
-    if (acc) acc.textContent = '94%';
-    if (tasks) tasks.textContent = '12';
+    var aiKey = (window.DARMAROC_CONFIG && window.DARMAROC_CONFIG.ai && window.DARMAROC_CONFIG.ai.gemini && window.DARMAROC_CONFIG.ai.gemini.apiKey) || '';
+    var alerts = [];
+    var newArr = reservations.filter(function (r) { return r.status === 'pending'; }).length;
+    var today = new Date().toISOString().slice(0, 10);
+    var arrivals = reservations.filter(function (r) { return (r.dates || '').indexOf(today) === 0 || (r.arrival === today); }).length;
+    var cleanTodo = cleanings.filter(function (c) { return c.status !== 'done' && c.status !== 'confirmed'; }).length;
+    var maintTodo = maintenances.filter(function (m) { return m.status !== 'done' && m.status !== 'completed'; }).length;
+    if (newArr) alerts.push(newArr + ' réservation(s) en attente');
+    if (arrivals) alerts.push(arrivals + ' arrivée(s) aujourd’hui');
+    if (cleanTodo) alerts.push(cleanTodo + ' tâche(s) ménage');
+    if (maintTodo) alerts.push(maintTodo + ' intervention(s) maintenance');
+    if (!alerts.length) alerts.push('Aucune alerte opérationnelle pour le moment.');
+    if (req) req.textContent = '0';
+    if (acc) acc.textContent = aiKey ? '—' : '—';
+    if (tasks) tasks.textContent = String(cleanTodo + maintTodo);
     if (status) {
-      status.innerHTML = '<div class="ai-indicator online"><i class="fas fa-circle-check"></i> IA en ligne - GPT-4 connecté</div>';
+      status.innerHTML = aiKey
+        ? '<div class="ai-indicator online"><i class="fas fa-circle-check"></i> IA configurée (Gemini) — analyse locale des données.</div>'
+        : '<div class="ai-indicator offline"><i class="fas fa-circle-xmark"></i> IA non connectée — configuration requise (clé Gemini dans config/site-config.js).</div>';
+      status.innerHTML += '<div class="ai-indicator pending" style="margin-top:8px;display:block;"><i class="fas fa-lightbulb"></i> ' + alerts.map(esc).join(' · ') + '</div>';
+      status.innerHTML += '<p class="muted" style="margin-top:8px;">Niveaux : 🟢 Automatique (risque faible) · 🟠 Validation requise · 🔴 Humain obligatoire (juridique, litiges, remboursements).</p>';
     }
     var btn = document.getElementById('aiGenBtn');
-    if (btn) {
+    if (btn && !btn._bound) {
+      btn._bound = true;
       btn.addEventListener('click', function () {
-        var type = document.getElementById('aiGenType').value;
         var result = document.getElementById('aiGenResult');
         if (!result) return;
+        if (!aiKey) {
+          result.innerHTML = '<div class="ai-indicator offline"><i class="fas fa-circle-xmark"></i> Génération indisponible : configurez la clé Gemini dans config/site-config.js.</div>';
+          return;
+        }
         result.innerHTML = '<div class="ai-indicator pending"><i class="fas fa-spinner fa-spin"></i> Génération en cours...</div>';
-        setTimeout(function () {
-          var texts = {
-            description: 'Magnifique villa avec piscine privée située dans un quartier résidentiel calme à Casablanca. 4 chambres, 3 salles de bain, jardin luxuriant. Idéale pour les familles.',
-            social: '🇲🇦 Découvrez cette magnifique villa à Casablanca ! Piscine privée, jardin luxuriant. Contactez-nous pour une visite.',
-            email: 'Bonjour, je vous présente notre nouvelle propriété disponible. Contactez-nous pour plus d'informations.'
-          };
-          result.innerHTML = '<textarea rows="6" style="width:100%;box-sizing:border-box;background:var(--bg-soft);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:12px;">' + (texts[type] || texts.description) + '</textarea>';
-        }, 1500);
+        var type = document.getElementById('aiGenType').value;
+        if (window.DarMarocAI && window.DarMarocAI.generate) {
+          window.DarMarocAI.generate(type).then(function (text) {
+            result.innerHTML = '<textarea rows="6" style="width:100%;box-sizing:border-box;background:var(--bg-soft);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:12px;">' + esc(text || '') + '</textarea>';
+          }).catch(function () {
+            result.innerHTML = '<div class="ai-indicator offline"><i class="fas fa-circle-xmark"></i> Erreur IA — vérifiez la clé et le quota.</div>';
+          });
+        } else {
+          result.innerHTML = '<div class="ai-indicator offline"><i class="fas fa-circle-xmark"></i> Module DarMarocAI absent.</div>';
+        }
       });
     }
   }
 
   /* DOCUMENTS */
-  var documents = [
-    { name: 'Contrat Villa Casablanca.pdf', type: 'PDF', size: '2.4 MB', date: '2025-12-01' },
-    { name: 'Facture Janvier 2026.pdf', type: 'PDF', size: '180 KB', date: '2026-01-01' }
-  ];
+  var documents = [];
   function renderDocuments() {
     var body = document.getElementById('docBody');
     if (!body) return;
@@ -1694,11 +1890,7 @@
   }
 
   /* NOTIFICATIONS */
-  var notifications = [
-    { icon: 'fa-calendar-check', text: 'Nouvelle réservation de Ahmed Benali', time: '2h ago', unread: true },
-    { icon: 'fa-euro-sign', text: 'Paiement reçu de 4,500 DH', time: '5h ago', unread: true },
-    { icon: 'fa-exclamation-triangle', text: 'Maintenance urgente - Villa Marrakech', time: '1j ago', unread: false }
-  ];
+  var notifications = [];
   function renderNotifications() {
     var list = document.getElementById('notifList');
     if (!list) return;
@@ -1717,44 +1909,44 @@
 
   /* RAPPORTS */
   function renderReports() {
-    var vues = document.getElementById('repVues');
-    var vis = document.getElementById('repVisiteurs');
-    var rev = document.getElementById('repRev');
-    var taux = document.getElementById('repTaux');
-    if (vues) vues.textContent = '12,450';
-    if (vis) vis.textContent = '3,200';
-    if (rev) rev.textContent = '12,450 DH';
-    if (taux) taux.textContent = '8.4%';
+    var st = window.DarMarocStats ? window.DarMarocStats.summary() : null;
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    set('repVues', st ? (st.views || 0).toLocaleString('fr-FR') : '0');
+    set('repVisiteurs', '0');
+    set('repRev', '0 MAD');
+    set('repTaux', '0%');
   }
 
-  /* AUTOMATISATIONS */
+  /* AUTOMATISATIONS (center) */
   var automations = [
-    { trigger: 'Nouvelle réservation', action: 'Notification email + SMS', active: true, last: '2026-01-14' },
-    { trigger: 'Paiement reçu', action: 'Confirmer réservation', active: true, last: '2026-01-10' },
-    { trigger: 'Ménage terminé', action: 'Notification propriétaire', active: false, last: '—' }
+    { trigger: 'Nouvelle réservation', action: 'Créer tâche ménage + notifier', active: true, last: '—' },
+    { trigger: 'Départ voyageur', action: 'Programmer contrôle logement', active: true, last: '—' },
+    { trigger: 'Arrivée voyageur', action: 'Préparer message d\u2019accueil', active: false, last: '—' },
+    { trigger: 'Document proche expiration', action: 'Alerte gestionnaire', active: true, last: '—' },
+    { trigger: 'Paiement reçu', action: 'Mettre à jour dossier', active: true, last: '—' },
+    { trigger: 'Réservation annulée', action: 'Libérer calendrier', active: false, last: '—' },
+    { trigger: 'Anomalie calendrier', action: 'Notification admin', active: true, last: '—' }
   ];
   function renderAutomations() {
     var body = document.getElementById('autoBody');
     if (!body) return;
-    body.innerHTML = automations.map(function(a) {
-      return '<tr><td>' + esc(a.trigger) + '</td><td>' + esc(a.action) + '</td><td><div class="toggle ' + (a.active ? 'on' : '') + '"></div></td><td>' + a.last + '</td>' +
+    body.innerHTML = automations.map(function(a, i) {
+      return '<tr><td>' + esc(a.trigger) + '</td><td>' + esc(a.action) + '</td><td><div class="toggle ' + (a.active ? 'on' : '') + '" data-idx="' + i + '"></div></td><td>' + a.last + '</td>' +
         '<td><div class="row-actions"><button class="btn-icon"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
     }).join('') || '<tr><td colspan="5" class="muted">Aucune automatisation.</td></tr>';
-    /* Toggle click */
-    body.querySelectorAll('.toggle').forEach(function (t, i) {
-      t.addEventListener('click', function () {
-        automations[i].active = !automations[i].active;
-        t.classList.toggle('on');
-        toast('Automatisation ' + (automations[i].active ? 'activée' : 'désactivée') + '.');
+    body.querySelectorAll('.toggle').forEach(function(t) {
+      t.addEventListener('click', function() {
+        var idx = parseInt(this.getAttribute('data-idx'), 10);
+        automations[idx].active = !automations[idx].active;
+        this.classList.toggle('on');
+        logAudit('Automatisation', automations[idx].trigger, automations[idx].active ? 'désactivée' : 'activée', automations[idx].active ? 'activée' : 'désactivée');
+        toast('Automatisation ' + (automations[idx].active ? 'activée' : 'désactivée') + '.');
       });
     });
   }
 
   /* PROPRIÉTAIRES */
-  var owners = [
-    { name: 'Mohamed Alaoui', email: 'mohamed@email.com', phone: '+212 612 345 678', props: 2, commission: '10%' },
-    { name: 'Khadija Benjelloun', email: 'khadija@email.com', phone: '+212 698 765 432', props: 1, commission: '8%' }
-  ];
+  var owners = [];
   function renderOwners() {
     var body = document.getElementById('ownerBody');
     if (!body) return;
@@ -1764,9 +1956,134 @@
     }).join('') || '<tr><td colspan="6" class="muted">Aucun proprietaire.</td></tr>';
   }
 
+
+  /* Connecteur test */
+  window.testConnection = function(platform) {
+    toast('Test de connexion a ' + platform + ' en cours...');
+  };
+
+  /* Connectors data */
+  var connectors = [];
+
+  /* Webhook & API management */
+  var webhooks = [];
+
+  function renderWebhooks() {
+    var body = document.getElementById('webhookBody');
+    if (!body) return;
+    body.innerHTML = webhooks.map(function(w) {
+      return '<tr><td><code style="font-size:0.75rem;">' + esc(w.url) + '</code></td><td>' + esc(w.event) + '</td><td><span class="status-badge ' + (w.active ? 'confirmed' : 'pending') + '">' + (w.active ? 'Actif' : 'Inactif') + '</span></td>' +
+        '<td><div class="toggle ' + (w.active ? 'on' : '') + '"></div></td><td><button class="btn-icon"><i class="fas fa-pen"></i></button></td></tr>';
+    }).join('') || '<tr><td colspan="5" class="muted">Aucun webhook.</td></tr>';
+  }
+
+  /* ---------- Audit log ---------- */
+  var auditLog = [];
+  try { auditLog = JSON.parse(localStorage.getItem('darmaroc-audit-log') || '[]'); } catch (e) { auditLog = []; }
+  function logAudit(object, action, oldV, newV) {
+    auditLog.unshift({
+      user: USERNAME || 'darmaroc',
+      role: ROLE || 'admin',
+      action: action || '',
+      object: object || '',
+      oldV: oldV || '',
+      newV: newV || '',
+      at: new Date().toISOString()
+    });
+    if (auditLog.length > 500) auditLog.pop();
+    try { localStorage.setItem('darmaroc-audit-log', JSON.stringify(auditLog)); } catch (e) {}
+  }
+  function renderAudit() {
+    var body = document.getElementById('auditBody');
+    if (!body) return;
+    body.innerHTML = auditLog.map(function (a) {
+      return '<tr><td>' + esc(a.user) + '</td><td>' + esc(a.action) + '</td><td>' + esc(a.object) + '</td><td class="muted">' + esc(a.oldV) + '</td><td>' + esc(a.newV) + '</td><td class="muted" style="font-size:0.78rem;">' + esc(new Date(a.at).toLocaleString('fr-FR')) + '</td></tr>';
+    }).join('') || '<tr><td colspan="6" class="muted">Aucune activité enregistrée.</td></tr>';
+  }
+
+  /* ---------- Prestataires ---------- */
+  var providers = [];
+  function renderPrestataires() {
+    var body = document.getElementById('provBody');
+    if (!body) return;
+    body.innerHTML = providers.map(function (p, i) {
+      return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.trade) + '</td><td>' + esc(p.phone || '—') + '</td><td>' + esc(p.email || '—') + '</td><td>' + esc(p.tasks || 0) + '</td>' +
+        '<td><div class="row-actions"><button class="btn-icon" data-prov-edit="' + i + '"><i class="fas fa-pen"></i></button><button class="btn-icon danger" data-prov-del="' + i + '"><i class="fas fa-trash"></i></button></div></td></tr>';
+    }).join('') || '<tr><td colspan="6" class="muted">Aucun prestataire.</td></tr>';
+  }
+
+  /* ---------- Tarification ---------- */
+  var pricing = [];
+  function renderTarifs() {
+    var body = document.getElementById('priceBody');
+    if (!body) return;
+    body.innerHTML = pricing.map(function (p, i) {
+      return '<tr><td>' + esc(p.property) + '</td><td>' + esc(p.current) + '</td><td>' + esc(p.recommended || '—') + '</td><td>' + esc(p.min || '—') + '</td><td>' + esc(p.max || '—') + '</td><td>' + esc(p.season || '—') + '</td>' +
+        '<td><div class="row-actions">' + (p.recommended ? '<button class="btn-icon" data-price-accept="' + i + '" title="Accepter"><i class="fas fa-check"></i></button><button class="btn-icon danger" data-price-reject="' + i + '" title="Refuser"><i class="fas fa-xmark"></i></button>' : '<span class="muted">—</span>') + '</div></td></tr>';
+    }).join('') || '<tr><td colspan="7" class="muted">Aucune tarification configurée. PriceLabs non connecté.</td></tr>';
+    var note = document.getElementById('priceAiNote');
+    if (note) note.textContent = pricing.some(function (p) { return p.recommended; })
+      ? 'Le tarif recommandé a changé parce que la demande prévue pour cette période est différente. Accepter ou refuser la recommandation.'
+      : 'Aucune recommandation tarifaire pour le moment (PriceLabs non connecté).';
+  }
+
+  /* ---------- Rôles ---------- */
+  var ROLES = [
+    { key: 'admin', label: 'Admin DarMaroc', perms: ['all'] },
+    { key: 'gestionnaire', label: 'Gestionnaire', perms: ['properties', 'calendar', 'reservations', 'cleaning', 'maintenance', 'access', 'reports'] },
+    { key: 'proprietaire', label: 'Propriétaire', perms: ['own-properties', 'own-revenue', 'own-reports', 'own-documents'] },
+    { key: 'prestataire', label: 'Prestataire', perms: ['assigned-cleaning', 'assigned-maintenance'] },
+    { key: 'lecteur', label: 'Lecteur / Support', perms: ['view-only'] }
+  ];
+  function renderRoles() {
+    var body = document.getElementById('roleBody');
+    if (!body) return;
+    body.innerHTML = ROLES.map(function (r) {
+      return '<tr><td><strong>' + esc(r.label) + '</strong></td><td>' + esc(r.perms.join(', ')) + '</td><td>' + (r.key === 'admin' ? '<span class="muted">Verrouillé</span>' : '<button class="btn-icon" data-role-edit="' + esc(r.key) + '"><i class="fas fa-pen"></i></button>') + '</td></tr>';
+    }).join('');
+  }
+
+  /* ---------- KPIs + AI zone (overview) ---------- */
+  function renderOverviewKPIs() {
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    var activeProps = DB.properties.length;
+    set('kpiActive', String(activeProps));
+    set('kpiAvailable', String(activeProps));
+    set('kpiReservations', String(reservations.length));
+    var today = new Date().toISOString().slice(0, 10);
+    set('kpiArrivals', String(reservations.filter(function (r) { return r.arrival === today || (r.dates || '').indexOf(today) === 0; }).length));
+    set('kpiDepartures', String(reservations.filter(function (r) { return r.departure === today || (r.dates || '').indexOf(today) > -1 && (r.dates || '').indexOf(today) === (r.dates || '').length - 10; }).length));
+    set('kpiOccupancy', activeProps ? '0%' : '0%');
+    var rev = 0; reservations.forEach(function (r) { rev += Number(String(r.amount || '').replace(/[^0-9.]/g, '')) || 0; });
+    set('kpiRevenue', rev.toLocaleString('fr-FR') + ' MAD');
+    set('kpiPendingPay', String(reservations.filter(function (r) { return r.status === 'pending'; }).length));
+    set('kpiCleaning', String(cleanings.filter(function (c) { return c.status !== 'done'; }).length));
+    set('kpiMaint', String(maintenances.filter(function (m) { return m.status !== 'done'; }).length));
+    set('kpiAlerts', String(notifications.filter(function (n) { return n.unread; }).length));
+    set('kpiDocs', String(documents.length));
+    var ai = document.getElementById('aiOverview');
+    if (ai) {
+      var lines = [];
+      var newArr = reservations.filter(function (r) { return r.status === 'pending'; }).length;
+      if (newArr) lines.push(newArr + ' nouvelle(s) réservation(s) en attente');
+      var arr = reservations.filter(function (r) { return r.arrival === today; }).length;
+      if (arr) lines.push(arr + ' arrivée(s) aujourd’hui');
+      var cl = cleanings.filter(function (c) { return c.status !== 'done'; }).length;
+      if (cl) lines.push(cl + ' tâche(s) ménage');
+      if (documents.length) lines.push(documents.length + ' document(s) à vérifier');
+      var un = notifications.filter(function (n) { return n.unread; }).length;
+      if (un) lines.push(un + ' anomalie(s)/notification(s)');
+      ai.innerHTML = lines.length
+        ? lines.map(function (l) { return '<div class="ai-indicator pending" style="display:block;margin:4px 0;"><i class="fas fa-circle-info"></i> ' + esc(l) + ' — <button class="btn-icon" style="width:auto;padding:2px 8px;height:auto;" data-ai-action="1">Agir</button></div>'; }).join('')
+        : '<div class="ai-indicator online"><i class="fas fa-circle-check"></i> Rien à signaler pour le moment.</div>';
+    }
+  }
+
   function renderAllExtended() {
+    renderOverviewKPIs();
     renderCalendar();
     renderReservations();
+    renderWebhooks();
     renderTravelers();
     renderRevenue();
     renderCleanings();
@@ -1780,6 +2097,10 @@
     renderReports();
     renderAutomations();
     renderOwners();
+    renderPrestataires();
+    renderTarifs();
+    renderAudit();
+    renderRoles();
   }
 
   /* ---------- Navigation 19 sections ---------- */
@@ -1797,29 +2118,16 @@
       showcase: 'Demonstration', partners: 'Partenaires', channels: 'Canaux', 'ai-manager': 'AI Manager',
       automations: 'Automatisations', services: 'Services', categories: 'Categories', testimonials: 'Temoignages',
       faq: 'FAQ', contacts: 'Contacts', documents: 'Documents', notifications: 'Notifications',
-      reports: 'Rapports', settings: 'Reglages'
+      reports: 'Rapports', settings: 'Reglages', users: 'Utilisateurs',
+      prestataires: 'Prestataires', pricing: 'Tarification', audit: 'Journal d\u2019activite', roles: 'Roles & permissions'
     };
     var titleEl = document.getElementById('viewTitle');
     if (titleEl) titleEl.textContent = titles[view] || 'Tableau de bord';
     renderAllExtended();
+    renderWebhooks();
   }
 
-  document.querySelectorAll('.nav-link').forEach(function (link) {
-    link.addEventListener('click', function (e) {
-      e.preventDefault();
-      var view = this.getAttribute('data-view');
-      if (view) switchView(view);
-    });
-  });
-
-  /* ---------- Gestion modal pour nouvelles entités ---------- */
-  document.querySelectorAll('[data-new]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var type = this.getAttribute('data-new');
-      openModal('Ajouter ' + type, '<div class="muted">Formulaire ' + type + ' - à implémenter.</div>');
-    });
-  });
-
-  /* ---------- Init ---------- */
+    /* ---------- Init ---------- */
+  if (typeof loadOps === 'function') loadOps();
   renderAllExtended();
 })();
