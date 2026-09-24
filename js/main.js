@@ -118,11 +118,16 @@
       });
     });
 
-    document.addEventListener('pointerdown', event => {
-      if (window.innerWidth <= 992 && navLinks.classList.contains('active') &&
-          !navLinks.contains(event.target) && !navToggle.contains(event.target)) {
-        closeMobileMenu();
-      }
+    const isOutsideMenu = (target) =>
+      !navLinks.contains(target) && !navToggle.contains(target);
+
+    ['pointerdown', 'click', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, event => {
+        if (window.innerWidth <= 992 && navLinks.classList.contains('active') &&
+            isOutsideMenu(event.target)) {
+          closeMobileMenu();
+        }
+      }, true);
     });
   }
 
