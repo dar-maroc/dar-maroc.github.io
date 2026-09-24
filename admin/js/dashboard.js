@@ -379,6 +379,7 @@
       if (!IS_ADMIN && (p.owner || '') !== USERNAME) return;
       rows.push('<tr><td>' + esc(p.fr) + '</td><td>' + esc(typeLabel[p.cat] || p.cat) + '</td><td>' + esc(p.price || '') + '</td><td>' + esc(p.city || '') + '</td><td>' + fmtDate(p.createdAt) + '</td>' +
         '<td><div class="row-actions">' +
+        '<button class="btn-icon" data-detail="property" data-index="' + i + '" title="Voir la fiche"><i class="fas fa-eye"></i></button>' +
         '<button class="btn-icon" data-edit="property" data-index="' + i + '" title="Modifier"><i class="fas fa-pen"></i></button>' +
         '<button class="btn-icon danger" data-del="property" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button>' +
         '</div></td></tr>');
@@ -1231,15 +1232,22 @@
       { id: 'eName', label: 'Nom', required: true },
       { id: 'eEmail', label: 'Email', type: 'email' },
       { id: 'ePhone', label: 'Telephone' },
-      { id: 'eCountry', label: 'Pays' }
-    ], save: function (v) { travelers.unshift({ name: v.eName, email: v.eEmail, phone: v.ePhone, country: v.eCountry, lastVisit: '' }); logAudit('Voyageur', 'Creation', '', v.eName); persistOps(); } },
+      { id: 'eCountry', label: 'Pays' },
+      { id: 'eNat', label: 'Nationalite' },
+      { id: 'ePassport', label: 'Passeport (ref. masquee)' },
+      { id: 'ePref', label: 'Contact prefere', type: 'select', options: [{v:'email',l:'Email'},{v:'phone',l:'Telephone'},{v:'whatsapp',l:'WhatsApp'}] },
+      { id: 'eLoyalty', label: 'Fidelite', type: 'select', options: [{v:'Nouveau',l:'Nouveau'},{v:'Fidele',l:'Fidele'},{v:'VIP',l:'VIP'}] },
+      { id: 'eNotes', label: 'Notes' }
+    ], save: function (v) { travelers.unshift({ name: v.eName, email: v.eEmail, phone: v.ePhone, country: v.eCountry, nationality: v.eNat, passport: v.ePassport, pref: v.ePref || 'email', loyalty: v.eLoyalty || 'Nouveau', notes: v.eNotes, stays: 0, total: 0, lastVisit: '' }); logAudit('Voyageur', 'Creation', '', v.eName); persistOps(); } },
     cleaning: { title: 'Menage', fields: [
       { id: 'eProperty', label: 'Logement', required: true },
       { id: 'eDate', label: 'Date', type: 'date', required: true },
       { id: 'eType', label: 'Type', type: 'select', options: [{v:'Complet',l:'Complet'},{v:'Partiel',l:'Partiel'},{v:'Sortie',l:'Depart'},{v:'Arrivee',l:'Arrivee'}] },
       { id: 'eDuration', label: 'Duree' },
+      { id: 'eAssignee', label: 'Responsable' },
+      { id: 'eCost', label: 'Cout (DH)', type: 'number' },
       { id: 'eStatus', label: 'Statut', type: 'select', options: [{v:'pending',l:'A faire'},{v:'in-progress',l:'En cours'},{v:'confirmed',l:'Termine'},{v:'cancelled',l:'Probleme'}] }
-    ], save: function (v) { cleanings.unshift({ property: v.eProperty, date: v.eDate, type: v.eType, duration: v.eDuration, status: v.eStatus || 'pending' }); logAudit('Menage', 'Creation', '', v.eProperty + ' ' + v.eDate); persistOps(); } },
+    ], save: function (v) { cleanings.unshift({ property: v.eProperty, date: v.eDate, type: v.eType, duration: v.eDuration, assignee: v.eAssignee, cost: v.eCost, status: v.eStatus || 'pending' }); logAudit('Menage', 'Creation', '', v.eProperty + ' ' + v.eDate); persistOps(); } },
     maintenance: { title: 'Maintenance', fields: [
       { id: 'eProperty', label: 'Logement', required: true },
       { id: 'eIssue', label: 'Probleme', required: true },
@@ -1251,9 +1259,13 @@
       { id: 'eProperty', label: 'Logement', required: true },
       { id: 'eType', label: 'Type', type: 'select', options: [{v:'Code',l:'Code'},{v:'Cle',l:'Cle'},{v:'Badge',l:'Badge'},{v:'Tuya',l:'Serrure connectee'}] },
       { id: 'eCode', label: 'Code / Reference' },
+      { id: 'eLock', label: 'Etat serrure (Tuya)', type: 'select', options: [{v:'req',l:'Connexion requise'},{v:'open',l:'Ouverte'},{v:'closed',l:'Fermeee'}] },
+      { id: 'eBattery', label: 'Batterie (%)', type: 'number' },
+      { id: 'eLastOpen', label: 'Derniere ouverture', type: 'datetime-local' },
+      { id: 'eTemp', label: 'Acces temporaire (jusqu\'au)', type: 'date' },
       { id: 'eDate', label: 'Date', type: 'date' },
       { id: 'eStatus', label: 'Statut', type: 'select', options: [{v:'active',l:'Actif'},{v:'pending',l:'Temporaire'},{v:'cancelled',l:'Inactif'}] }
-    ], save: function (v) { accesses.unshift({ property: v.eProperty, type: v.eType, code: v.eCode, date: v.eDate, status: v.eStatus || 'active' }); logAudit('Acces', 'Creation', '', v.eProperty); persistOps(); } },
+    ], save: function (v) { accesses.unshift({ property: v.eProperty, type: v.eType, code: v.eCode, lock: v.eLock || 'req', battery: v.eBattery, lastOpen: v.eLastOpen, temp: v.eTemp, date: v.eDate, status: v.eStatus || 'active' }); logAudit('Acces', 'Creation', '', v.eProperty); persistOps(); } },
     owner: { title: 'Proprietaire', fields: [
       { id: 'eName', label: 'Nom', required: true },
       { id: 'eEmail', label: 'Email', type: 'email' },
@@ -1263,9 +1275,12 @@
     ], save: function (v) { owners.unshift({ name: v.eName, email: v.eEmail, phone: v.ePhone, props: v.eProps || 0, commission: (v.eComm || 0) + '%' }); logAudit('Proprietaire', 'Creation', '', v.eName); persistOps(); } },
     document: { title: 'Document', fields: [
       { id: 'eName', label: 'Nom du fichier', required: true },
+      { id: 'eProperty', label: 'Bien concerne' },
       { id: 'eType', label: 'Type', type: 'select', options: [{v:'PDF',l:'PDF'},{v:'IMG',l:'Image'},{v:'DOC',l:'Document'}] },
-      { id: 'eSize', label: 'Taille' }
-    ], save: function (v) { documents.unshift({ name: v.eName, type: v.eType || 'PDF', size: v.eSize || '-', date: new Date().toISOString().slice(0, 10) }); logAudit('Document', 'Ajout', '', v.eName); persistOps(); } },
+      { id: 'eSize', label: 'Taille' },
+      { id: 'eExpiration', label: 'Date d\'expiration', type: 'date' },
+      { id: 'eReminder', label: 'Rappel (jours avant)', type: 'number' }
+    ], save: function (v) { documents.unshift({ name: v.eName, property: v.eProperty, type: v.eType || 'PDF', size: v.eSize || '-', date: new Date().toISOString().slice(0, 10), expiration: v.eExpiration || '', reminder: v.eReminder || '', content: '' }); logAudit('Document', 'Ajout', '', v.eName); persistOps(); } },
     prestataire: { title: 'Prestataire', fields: [
       { id: 'eName', label: 'Nom / Societe', required: true },
       { id: 'eTrade', label: 'Metier', required: true },
@@ -1281,8 +1296,11 @@
       { id: 'eCurrent', label: 'Prix actuel (DH)', required: true },
       { id: 'eMin', label: 'Minimum' },
       { id: 'eMax', label: 'Maximum' },
-      { id: 'eSeason', label: 'Saison' }
-    ], save: function (v) { pricing.unshift({ property: v.eProperty, current: v.eCurrent, recommended: '', min: v.eMin, max: v.eMax, season: v.eSeason }); logAudit('Tarification', 'Creation', '', v.eProperty); persistOps(); } },
+      { id: 'eSeason', label: 'Saison' },
+      { id: 'eHistory', label: 'Historique (derniers prix)' },
+      { id: 'eDemand', label: 'Demande', type: 'select', options: [{v:'Faible',l:'Faible'},{v:'Normale',l:'Normale'},{v:'Forte',l:'Forte'}] },
+      { id: 'eEvents', label: 'Evenements (festivals, etc.)' }
+    ], save: function (v) { pricing.unshift({ property: v.eProperty, current: v.eCurrent, recommended: '', min: v.eMin, max: v.eMax, season: v.eSeason, history: v.eHistory, demand: v.eDemand, events: v.eEvents }); logAudit('Tarification', 'Creation', '', v.eProperty); persistOps(); } },
     channel: { title: 'Canal', fields: [
       { id: 'ePlatform', label: 'Plateforme', required: true },
       { id: 'eTypeC', label: 'Type', type: 'select', options: [{v:'OTA',l:'OTA'},{v:'Paiement',l:'Paiement'},{v:'IoT',l:'IoT'},{v:'Calendar',l:'Calendrier'},{v:'Pricing',l:'Tarification'},{v:'API',l:'API'},{v:'Webhook',l:'Webhook'},{v:'Messaging',l:'Messagerie'}] },
@@ -1290,23 +1308,85 @@
     ], save: function (v) { channels.push({ platform: v.ePlatform, type: v.eTypeC, id: v.eId, connected: false, sync: 'Non connecte', color: '#D4AF37', lastSync: '-', error: 'Configuration requise' }); logAudit('Canal', 'Ajout', '', v.ePlatform); persistOps(); } },
     'calendar-event': { title: 'Evenement calendrier', fields: [
       { id: 'eTitle', label: 'Titre', required: true },
+      { id: 'eProperty', label: 'Logement' },
       { id: 'eDate', label: 'Date', type: 'date', required: true },
+      { id: 'eEnd', label: 'Fin (optionnel)', type: 'date' },
       { id: 'eKind', label: 'Type', type: 'select', options: [{v:'reservation',l:'Reservation'},{v:'arrival',l:'Arrivee'},{v:'departure',l:'Depart'},{v:'block',l:'Blocage'},{v:'maintenance',l:'Maintenance'},{v:'cleaning',l:'Menage'}] }
-    ], save: function (v) { notifications.unshift({ icon: 'fa-calendar', text: 'Evenement : ' + v.eTitle + ' (' + v.eDate + ')', time: 'a l\u2019instant', unread: true }); logAudit('Calendrier', 'Evenement', '', v.eTitle); persistOps(); } }
+    ], save: function (v) { calendarEvents.unshift({ id: uid(), title: v.eTitle, property: v.eProperty, date: v.eDate, end: v.eEnd || v.eDate, kind: v.eKind || 'block' }); logAudit('Calendrier', 'Evenement', '', v.eTitle); persistOps(); } }
   };
 
   function newEntityForm(type, index) {
     var cfgE = ENTITY_FORMS[type];
     if (!cfgE) { openModal('Ajouter', '<div class="muted">Formulaire non disponible pour : ' + esc(type) + '.</div>'); modalForm._type = ''; return; }
+    var existing = null;
+    if (index >= 0) {
+      var arrMap = { reservation: reservations, traveler: travelers, cleaning: cleanings, maintenance: maintenances, access: accesses, owner: owners, document: documents, prestataire: providers, automation: automations, pricing: pricing, channel: channels, 'calendar-event': calendarEvents };
+      var list = arrMap[type];
+      if (list && list[index]) existing = list[index];
+    }
+    var prevVals = {
+      eTraveler: existing && existing.traveler, eProperty: existing && existing.property,
+      eDates: existing && existing.dates, eAmount: existing && existing.amount, eStatus: existing && existing.status,
+      eName: existing && existing.name, eEmail: existing && existing.email, ePhone: existing && existing.phone,
+      eCountry: existing && existing.country, eNat: existing && existing.nationality, ePassport: existing && existing.passport,
+      ePref: existing && existing.pref, eLoyalty: existing && existing.loyalty, eNotes: existing && existing.notes,
+      eDate: existing && existing.date, eType: existing && existing.type, eDuration: existing && existing.duration,
+      eAssignee: existing && existing.assignee, eCost: existing && existing.cost,
+      eIssue: existing && existing.issue, ePriority: existing && existing.priority,
+      eCode: existing && existing.code, eLock: existing && existing.lock, eBattery: existing && existing.battery,
+      eLastOpen: existing && existing.lastOpen, eTemp: existing && existing.temp,
+      eProps: existing && existing.props, eComm: existing && existing.commission && String(existing.commission).replace('%', ''),
+      eSize: existing && existing.size, eExpiration: existing && existing.expiration, eReminder: existing && existing.reminder,
+      eTrade: existing && existing.trade, eTrigger: existing && existing.trigger, eAction: existing && existing.action,
+      eCurrent: existing && existing.current, eMin: existing && existing.min, eMax: existing && existing.max,
+      eSeason: existing && existing.season, eHistory: existing && existing.history, eDemand: existing && existing.demand,
+      eEvents: existing && existing.events, ePlatform: existing && existing.platform, eTypeC: existing && existing.type,
+      eId: existing && existing.id, eTitle: existing && existing.title, eEnd: existing && existing.end, eKind: existing && existing.kind
+    };
     var html = cfgE.fields.map(function (f) {
-      if (f.type === 'select') return field(f.label, f.id, (f.options[0] || {}).v, { type: 'select', options: f.options });
-      return field(f.label, f.id, '', { type: f.type || 'text' });
+      var val = prevVals[f.id] != null ? prevVals[f.id] : '';
+      if (f.type === 'select') {
+        var v = val || (f.options[0] || {}).v;
+        return field(f.label, f.id, v, { type: 'select', options: f.options });
+      }
+      return field(f.label, f.id, val, { type: f.type || 'text' });
     }).join('');
     openModal((index >= 0 ? 'Modifier ' : 'Ajouter ') + cfgE.title, html);
     modalForm._type = 'entity';
     modalForm._entity = type;
     modalForm._index = index;
-    modalForm._save = cfgE.save;
+    modalForm._save = function (v) {
+      if (index >= 0) {
+        var arrMap = { reservation: reservations, traveler: travelers, cleaning: cleanings, maintenance: maintenances, access: accesses, owner: owners, document: documents, prestataire: providers, automation: automations, pricing: pricing, channel: channels, 'calendar-event': calendarEvents };
+        var list = arrMap[type];
+        if (list && list[index]) {
+          var oldObj = Object.assign({}, list[index]);
+          list[index] = Object.assign(list[index], mapEntityFields(type, v, list[index]));
+          logAudit(cfgE.title, 'Modification', JSON.stringify(oldObj).slice(0, 120), JSON.stringify(list[index]).slice(0, 120));
+          persistOps();
+          return;
+        }
+      }
+      cfgE.save(v);
+    };
+  }
+
+  function mapEntityFields(type, v, prev) {
+    switch (type) {
+      case 'reservation': return { traveler: v.eTraveler, property: v.eProperty, dates: v.eDates, status: v.eStatus, amount: v.eAmount };
+      case 'traveler': return Object.assign({}, prev, { name: v.eName, email: v.eEmail, phone: v.ePhone, country: v.eCountry, nationality: v.eNat, passport: v.ePassport, pref: v.ePref, loyalty: v.eLoyalty, notes: v.eNotes });
+      case 'cleaning': return { property: v.eProperty, date: v.eDate, type: v.eType, duration: v.eDuration, assignee: v.eAssignee, cost: v.eCost, status: v.eStatus };
+      case 'maintenance': return { property: v.eProperty, issue: v.eIssue, priority: v.ePriority, date: v.eDate, status: v.eStatus };
+      case 'access': return { property: v.eProperty, type: v.eType, code: v.eCode, lock: v.eLock, battery: v.eBattery, lastOpen: v.eLastOpen, temp: v.eTemp, date: v.eDate, status: v.eStatus };
+      case 'owner': return { name: v.eName, email: v.eEmail, phone: v.ePhone, props: v.eProps, commission: (v.eComm || 0) + '%' };
+      case 'document': return Object.assign({}, prev, { name: v.eName, property: v.eProperty, type: v.eType, size: v.eSize, expiration: v.eExpiration, reminder: v.eReminder });
+      case 'prestataire': return { name: v.eName, trade: v.eTrade, phone: v.ePhone, email: v.eEmail };
+      case 'automation': return { trigger: v.eTrigger, action: v.eAction };
+      case 'pricing': return Object.assign({}, prev, { property: v.eProperty, current: v.eCurrent, min: v.eMin, max: v.eMax, season: v.eSeason, history: v.eHistory, demand: v.eDemand, events: v.eEvents });
+      case 'channel': return Object.assign({}, prev, { platform: v.ePlatform, type: v.eTypeC, id: v.eId });
+      case 'calendar-event': return Object.assign({}, prev, { title: v.eTitle, property: v.eProperty, date: v.eDate, end: v.eEnd, kind: v.eKind });
+      default: return prev;
+    }
   }
 
   /* Persist operational data (reservations, tasks, etc.) */
@@ -1317,7 +1397,8 @@
         reservations: reservations, travelers: travelers, cleanings: cleanings,
         maintenances: maintenances, accesses: accesses, documents: documents,
         owners: owners, notifications: notifications, automations: automations,
-        providers: providers, pricing: pricing, channels: channels
+        providers: providers, pricing: pricing, channels: channels,
+        calendarEvents: calendarEvents
       }));
     } catch (e) {}
   }
@@ -1338,6 +1419,7 @@
       if (o.providers) providers = o.providers;
       if (o.pricing) pricing = o.pricing;
       if (o.channels) channels = o.channels;
+      if (o.calendarEvents) calendarEvents = o.calendarEvents;
     } catch (e) {}
   }
 
@@ -1363,6 +1445,71 @@
   document.body.addEventListener('click', function (e) {
     var editBtn = e.target.closest('[data-edit]');
     var delBtn = e.target.closest('[data-del]');
+    var detailBtn = e.target.closest('[data-detail="property"]');
+    var cleanBtn = e.target.closest('[data-clean-task]');
+    var priceAcc = e.target.closest('[data-price-accept]');
+    var priceRej = e.target.closest('[data-price-reject]');
+    var docUp = e.target.closest('[data-doc-upload]');
+    var docDl = e.target.closest('[data-doc-dl]');
+    var docDel = e.target.closest('[data-doc-del]');
+    var aiAct = e.target.closest('[data-ai-action]');
+    var calModeBtn = e.target.closest('[data-cal-mode]');
+    var provEd = e.target.closest('[data-prov-edit]');
+    var provDel = e.target.closest('[data-prov-del]');
+    var roleEd = e.target.closest('[data-role-edit]');
+    if (detailBtn) { openPropertyDetail(Number(detailBtn.dataset.index)); return; }
+    if (provEd) { newEntityForm('prestataire', Number(provEd.getAttribute('data-prov-edit'))); return; }
+    if (provDel) {
+      var prIdx = Number(provDel.getAttribute('data-prov-del'));
+      askConfirm('Supprimer ce prestataire ?', function () {
+        logAudit('Prestataire', 'Suppression', providers[prIdx] && providers[prIdx].name, '');
+        providers.splice(prIdx, 1); persistOps(); renderPrestataires(); toast('Prestataire supprimé.');
+      });
+      return;
+    }
+    if (roleEd) {
+      var rk = roleEd.getAttribute('data-role-edit');
+      var role = ROLES.filter(function (r) { return r.key === rk; })[0];
+      if (!role) return;
+      openModal('Permissions — ' + role.label,
+        '<div class="field"><label>Permissions (séparées par des virgules)</label><input type="text" id="rolePerms" value="' + esc(role.perms.join(', ')) + '"></div>' +
+        '<p class="muted">L\'admin conserve tous les droits. Les modifications sont tracées dans le journal d\'activité.</p>');
+      modalForm._type = 'role';
+      modalForm._roleKey = rk;
+      return;
+    }
+    if (cleanBtn) { openCleaningTask(Number(cleanBtn.getAttribute('data-clean-task'))); return; }
+    if (priceAcc || priceRej) {
+      var pi = Number((priceAcc || priceRej).getAttribute(priceAcc ? 'data-price-accept' : 'data-price-reject'));
+      if (priceAcc) {
+        pricing[pi].current = pricing[pi].recommended;
+        pricing[pi].history = (pricing[pi].history ? pricing[pi].history + ' · ' : '') + 'Accepté ' + new Date().toLocaleDateString('fr-FR');
+        logAudit('Tarification', 'Recommandation acceptée', '', pricing[pi].property + ' → ' + pricing[pi].current);
+        toast('Recommandation tarifaire acceptée.');
+      } else {
+        pricing[pi].history = (pricing[pi].history ? pricing[pi].history + ' · ' : '') + 'Refusé ' + new Date().toLocaleDateString('fr-FR');
+        logAudit('Tarification', 'Recommandation refusée', pricing[pi].recommended, pricing[pi].property);
+        toast('Recommandation refusée.');
+      }
+      pricing[pi].recommended = '';
+      persistOps(); renderTarifs(); return;
+    }
+    if (docUp) { promptDocUpload(Number(docUp.getAttribute('data-doc-upload'))); return; }
+    if (docDl) { downloadDoc(Number(docDl.getAttribute('data-doc-dl'))); return; }
+    if (docDel) {
+      var di = Number(docDel.getAttribute('data-doc-del'));
+      askConfirm('Supprimer ce document ?', function () {
+        logAudit('Document', 'Suppression', documents[di] && documents[di].name, '');
+        documents.splice(di, 1); persistOps(); renderDocuments(); toast('Document supprimé.');
+      });
+      return;
+    }
+    if (aiAct) { var av = aiAct.getAttribute('data-ai-action'); switchView(av && av !== '1' ? av : 'ai-manager'); return; }
+    if (calModeBtn) {
+      calMode = calModeBtn.getAttribute('data-cal-mode');
+      if (calMode === 'day' && !calDate) calDate = new Date();
+      renderCalendar(); return;
+    }
     if (editBtn) {
       var i = Number(editBtn.dataset.index);
       var et = editBtn.dataset.edit;
@@ -1378,12 +1525,24 @@
       else if (et === 'property') propertyForm(i);
       else if (et === 'contact') contactForm(i);
       else if (et === 'user') userForm(i);
+      else newEntityForm(et, i);
     } else if (delBtn) {
       var idx = Number(delBtn.dataset.index);
       var type = delBtn.dataset.del;
       if (type === 'user') { deleteUser(idx); return; }
       var col = colName(type);
       var item = DB[col] ? DB[col][idx] : undefined;
+      if (type === 'reservation' || type === 'traveler' || type === 'cleaning' || type === 'maintenance' || type === 'access' || type === 'document' || type === 'owner' || type === 'pricing' || type === 'channel' || type === 'prestataire') {
+        var arrMap = { reservation: reservations, traveler: travelers, cleaning: cleanings, maintenance: maintenances, access: accesses, document: documents, owner: owners, pricing: pricing, channel: channels, prestataire: providers };
+        var list = arrMap[type];
+        if (list && list[idx]) {
+          askConfirm('Supprimer cet élément ?', function () {
+            logAudit(type, 'Suppression', '', '');
+            list.splice(idx, 1); persistOps(); renderAllExtended(); toast('Élément supprimé.');
+          });
+        }
+        return;
+      }
       if (!IS_ADMIN && item && (item.owner || '') !== USERNAME) { toast('Vous ne pouvez supprimer que vos propres annonces.', true); return; }
       askConfirm('Supprimer cet élément ?', function () {
         DB[col].splice(idx, 1);
@@ -1398,6 +1557,50 @@
     }
   });
 
+  function promptDocUpload(i) {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/*,.doc,.docx';
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      if (!file || !documents[i]) return;
+      if (file.size > 2 * 1024 * 1024) {
+        documents[i].size = (Math.round(file.size / 1024) + ' Ko');
+        documents[i].content = '';
+        toast('Fichier trop lourd pour le stockage local (' + documents[i].size + ') — métadonnées enregistrées, stockage Supabase requis pour le contenu.', true);
+        logAudit('Document', 'Upload (métadonnées)', '', documents[i].name);
+        persistOps(); renderDocuments();
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        documents[i].content = reader.result;
+        documents[i].size = file.size < 1024 ? (file.size + ' o') : (Math.round(file.size / 1024) + ' Ko');
+        documents[i].name = file.name || documents[i].name;
+        logAudit('Document', 'Upload', '', documents[i].name);
+        persistOps(); renderDocuments(); toast('Fichier joint au document.');
+      };
+      reader.readAsDataURL(file);
+    });
+    input.click();
+  }
+
+  function downloadDoc(i) {
+    var d = documents[i];
+    if (!d) return;
+    if (!d.content) {
+      toast('Fichier non stocké localement — joignez-le via l\'icône upload.', true);
+      return;
+    }
+    var a = document.createElement('a');
+    a.href = d.content;
+    a.download = d.name || 'document';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    logAudit('Document', 'Téléchargement', '', d.name);
+  }
+
   document.getElementById('modalClose').addEventListener('click', closeModal);
   document.getElementById('modalCancel').addEventListener('click', closeModal);
   modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
@@ -1409,6 +1612,28 @@
       modalForm._confirm = false;
       closeModal();
       if (cb) cb();
+      return;
+    }
+    if (modalForm._type === 'task') {
+      saveCleaningTask(Number(modalForm._index));
+      return;
+    }
+    if (modalForm._type === 'propDetail') {
+      closeModal();
+      return;
+    }
+    if (modalForm._type === 'role') {
+      var rk = modalForm._roleKey;
+      var role = ROLES.filter(function (r) { return r.key === rk; })[0];
+      var permsEl = document.getElementById('rolePerms');
+      if (role && permsEl) {
+        var oldP = role.perms.join(', ');
+        role.perms = permsEl.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        logAudit('Rôle', 'Permissions ' + role.label, oldP, role.perms.join(', '));
+        toast('Permissions mises à jour.');
+        closeModal();
+        renderRoles();
+      }
       return;
     }
     submitForm();
@@ -1660,21 +1885,130 @@
   /* ---------- Nouvelles sections 19 vues ---------- */
 
   /* CALENDRIER */
+  var calMode = 'month';
+  var calDate = new Date();
+  var calProperty = '';
+  var calendarEvents = [];
+  var CAL_KIND_LABEL = { reservation: 'Réservation', arrival: 'Arrivée', departure: 'Départ', block: 'Blocage', maintenance: 'Maintenance', cleaning: 'Ménage', access: 'Accès' };
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function isoOf(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function parseIso(s) {
+    if (!s) return null;
+    var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+
+  function collectCalEvents(filterProp) {
+    var out = [];
+    function matchProp(name) { return !filterProp || (name || '') === filterProp; }
+    reservations.forEach(function (r) {
+      if (!matchProp(r.property)) return;
+      var m = String(r.dates || '').match(/(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})/);
+      var start = m ? m[1] : (r.arrival || '');
+      var end = m ? m[2] : (r.departure || start);
+      if (start) out.push({ date: start, end: end || start, kind: 'reservation', title: (r.traveler || 'Réservation') + ' — ' + (r.property || ''), detail: r.status || '' });
+      if (r.arrival) out.push({ date: r.arrival, end: r.arrival, kind: 'arrival', title: 'Arrivée ' + (r.traveler || ''), detail: r.property || '' });
+      if (r.departure) out.push({ date: r.departure, end: r.departure, kind: 'departure', title: 'Départ ' + (r.traveler || ''), detail: r.property || '' });
+    });
+    cleanings.forEach(function (c) {
+      if (!matchProp(c.property) || !c.date) return;
+      out.push({ date: c.date, end: c.date, kind: 'cleaning', title: 'Ménage — ' + (c.property || ''), detail: c.type || '' });
+    });
+    maintenances.forEach(function (m) {
+      if (!matchProp(m.property) || !m.date) return;
+      out.push({ date: m.date, end: m.date, kind: 'maintenance', title: 'Maintenance — ' + (m.issue || m.property), detail: m.priority || '' });
+    });
+    accesses.forEach(function (a) {
+      if (!matchProp(a.property) || !a.date) return;
+      out.push({ date: a.date, end: a.temp || a.date, kind: 'access', title: 'Accès — ' + (a.property || ''), detail: a.type || '' });
+    });
+    calendarEvents.forEach(function (e) {
+      if (!matchProp(e.property) || !e.date) return;
+      out.push({ date: e.date, end: e.end || e.date, kind: e.kind || 'block', title: e.title || 'Événement', detail: e.property || '' });
+    });
+    return out;
+  }
+
+  function eventsOn(iso, all) {
+    var d = parseIso(iso);
+    if (!d) return [];
+    return all.filter(function (e) {
+      var s = parseIso(e.date), en = parseIso(e.end || e.date);
+      if (!s) return false;
+      if (!en || en < s) en = s;
+      return d >= s && d <= en;
+    });
+  }
+
+  function eventChip(e) {
+    return '<div class="cal-event kind-' + esc(e.kind) + '" title="' + esc((CAL_KIND_LABEL[e.kind] || e.kind) + ' — ' + (e.detail || '')) + '">' + esc(e.title) + '</div>';
+  }
+
   function renderCalendar() {
     var grid = document.getElementById('calendarGrid');
+    var label = document.getElementById('calLabel');
+    var sel = document.getElementById('calProperty');
     if (!grid) return;
-    var now = new Date();
-    var month = now.getMonth(), year = now.getFullYear();
-    var firstDay = new Date(year, month, 1).getDay();
-    var daysInMonth = new Date(year, month + 1, 0).getDate();
-    var html = '<div class="cal-header" colspan="7">' + now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) + '</div>';
-    ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'].forEach(function(d) { html += '<div class="cal-header">' + d + '</div>'; });
-    for (var i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
-    for (var d = 1; d <= daysInMonth; d++) {
-      var isToday = d === now.getDate() && month === now.getMonth() && year === now.getFullYear();
-      html += '<div class="cal-day' + (isToday ? ' today' : '') + '"><div class="cal-date">' + d + '</div></div>';
+    if (sel && !sel._filled) {
+      var names = {};
+      DB.properties.forEach(function (p) { if (p.fr) names[p.fr] = 1; });
+      reservations.forEach(function (r) { if (r.property) names[r.property] = 1; });
+      Object.keys(names).forEach(function (n) {
+        var o = document.createElement('option');
+        o.value = n; o.textContent = n;
+        sel.appendChild(o);
+      });
+      sel._filled = true;
+      sel.addEventListener('change', function () { calProperty = sel.value; renderCalendar(); });
+    }
+    document.querySelectorAll('[data-cal-mode]').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-cal-mode') === calMode);
+    });
+    var all = collectCalEvents(calProperty);
+    var y = calDate.getFullYear(), mo = calDate.getMonth(), day = calDate.getDate();
+    if (label) {
+      if (calMode === 'day') label.textContent = calDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      else if (calMode === 'week') {
+        var ws = new Date(calDate); ws.setDate(ws.getDate() - ws.getDay());
+        var we = new Date(ws); we.setDate(we.getDate() + 6);
+        label.textContent = 'Semaine du ' + ws.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' au ' + we.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+      } else label.textContent = calDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    }
+    var todayIso = isoOf(new Date());
+    var html = '';
+    if (calMode === 'day') {
+      html = '<div class="cal-day-list">';
+      var list = eventsOn(isoOf(calDate), all);
+      html += list.length
+        ? list.map(eventChip).join('')
+        : '<p class="muted">Aucun événement ce jour' + (calProperty ? ' pour ' + esc(calProperty) : '') + '.</p>';
+      html += '</div>';
+    } else if (calMode === 'week') {
+      var ws2 = new Date(calDate); ws2.setDate(ws2.getDate() - ws2.getDay());
+      html = '<div class="cal-week">';
+      for (var i = 0; i < 7; i++) {
+        var d = new Date(ws2); d.setDate(d.getDate() + i);
+        var iso = isoOf(d);
+        var evs = eventsOn(iso, all);
+        html += '<div class="cal-day' + (iso === todayIso ? ' today' : '') + '"><div class="cal-date">' + d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }) + '</div>' +
+          evs.map(eventChip).join('') + '</div>';
+      }
+      html += '</div>';
+    } else {
+      var firstDay = new Date(y, mo, 1).getDay();
+      var daysInMonth = new Date(y, mo + 1, 0).getDate();
+      html = '';
+      ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].forEach(function (d) { html += '<div class="cal-header">' + d + '</div>'; });
+      for (var b = 0; b < firstDay; b++) html += '<div class="cal-day empty"></div>';
+      for (var dd = 1; dd <= daysInMonth; dd++) {
+        var iso2 = y + '-' + pad2(mo + 1) + '-' + pad2(dd);
+        var evs2 = eventsOn(iso2, all);
+        html += '<div class="cal-day' + (iso2 === todayIso ? ' today' : '') + '"><div class="cal-date">' + dd + '</div>' + evs2.map(eventChip).join('') + '</div>';
+      }
     }
     grid.innerHTML = html;
+    grid.className = calMode === 'month' ? 'calendar-grid' : (calMode === 'week' ? 'calendar-grid cal-week-wrap' : 'calendar-grid cal-day-wrap');
   }
 
   /* RESERVATIONS */
@@ -1684,7 +2018,7 @@
     if (!body) return;
     body.innerHTML = reservations.map(function(r) {
       return '<tr><td>' + esc(r.traveler) + '</td><td>' + esc(r.property) + '</td><td>' + r.dates + '</td><td><span class="status-badge ' + r.status + '">' + r.status + '</span></td><td>' + r.amount + '</td>' +
-        '<td><div class="row-actions"><button class="btn-icon" data-edit="reservation"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
+        '<td><div class="row-actions"><button class="btn-icon" data-edit="reservation" data-index="' + i + '"><i class="fas fa-pen"></i></button><button class="btn-icon danger" data-del="reservation" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button></div></td></tr>';
     }).join('') || '<tr><td colspan="6" class="muted">Aucune reservation.</td></tr>';
   }
 
@@ -1693,10 +2027,10 @@
   function renderTravelers() {
     var body = document.getElementById('travelerBody');
     if (!body) return;
-    body.innerHTML = travelers.map(function(t) {
-      return '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.email) + '</td><td>' + esc(t.phone) + '</td><td>' + esc(t.country) + '</td><td>' + t.lastVisit + '</td>' +
-        '<td><div class="row-actions"><button class="btn-icon" data-edit="traveler"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
-    }).join('') || '<tr><td colspan="6" class="muted">Aucun voyageur.</td></tr>';
+    body.innerHTML = travelers.map(function(t, ti) {
+      return '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.email) + '</td><td>' + esc(t.phone) + '</td><td>' + esc(t.country) + (t.nationality ? ' / ' + esc(t.nationality) : '') + '</td><td>' + esc(t.passport || '—') + '</td><td>' + esc(t.pref || '—') + '</td><td>' + (t.stays || 0) + '</td><td>' + esc(t.total != null ? t.total + ' DH' : '—') + '</td><td>' + esc(t.loyalty || '—') + '</td><td>' + esc(t.lastVisit || '—') + '</td><td class="muted">' + esc(t.notes || '—') + '</td>' +
+        '<td><div class="row-actions"><button class="btn-icon" data-edit="traveler" data-index="' + ti + '"><i class="fas fa-pen"></i></button><button class="btn-icon danger" data-del="traveler" data-index="' + ti + '" title="Supprimer"><i class="fas fa-trash"></i></button></div></td></tr>';
+    }).join('') || '<tr><td colspan="12" class="muted">Aucun voyageur.</td></tr>';
   }
 
   /* REVENUS */
@@ -1718,9 +2052,25 @@
     var body = document.getElementById('revBody');
     if (body) {
       body.innerHTML = reservations.map(function (r, i) {
-        return '<tr><td>' + esc(r.traveler || '—') + '</td><td>' + esc(r.property || '—') + '</td><td>' + esc(r.amount || '0') + '</td><td>' + esc(r.dates || '—') + '</td><td><span class="status-badge ' + (r.status === 'confirmed' || r.status === 'paid' ? 'confirmed' : 'pending') + '">' + esc(r.status || 'pending') + '</span></td>' +
-          '<td><button class="btn-icon"><i class="fas fa-file-invoice"></i></button></td></tr>';
-      }).join('') || '<tr><td colspan="6" class="muted">Aucun revenu enregistré (0 MAD).</td></tr>';
+        var gross = Number(String(r.amount || '').replace(/[^0-9.]/g, '')) || 0;
+        var ownerName = '';
+        owners.forEach(function (o) { if (o.props && (r.property || '').indexOf(o.name) > -1) ownerName = o.name; });
+        var owner = owners.filter(function (o) { return (r.property || '').indexOf(o.name) > -1; })[0];
+        var commRate = owner ? (parseFloat(owner.commission) || 0) : 0;
+        var commission = Math.round(gross * commRate / 100);
+        var fees = 0;
+        var expenses = Number(r.expenses) || 0;
+        var ownerNet = Math.max(0, gross - commission - fees - expenses);
+        var stripeCh = channels.filter(function (c) { return c.platform === 'Stripe'; })[0];
+        var feeNote = stripeCh && stripeCh.connected ? fees + ' DH' : 'n/c';
+        return '<tr><td>' + esc(r.traveler || '—') + '</td><td>' + esc(r.property || '—') + '</td><td>' + gross.toLocaleString('fr-FR') + ' DH</td>' +
+          '<td>' + (commRate ? commission.toLocaleString('fr-FR') + ' DH (' + commRate + '%)' : '—') + '</td>' +
+          '<td>' + esc(feeNote) + '</td><td>' + expenses.toLocaleString('fr-FR') + ' DH</td>' +
+          '<td>' + (commRate ? ownerNet.toLocaleString('fr-FR') + ' DH' : '—') + '</td>' +
+          '<td>' + esc(r.dates || '—') + '</td>' +
+          '<td><span class="status-badge ' + (r.status === 'confirmed' || r.status === 'paid' ? 'confirmed' : 'pending') + '">' + esc(r.status || 'pending') + '</span></td>' +
+          '<td><button class="btn-icon" title="Facture"><i class="fas fa-file-invoice"></i></button></td></tr>';
+      }).join('') || '<tr><td colspan="10" class="muted">Aucun revenu enregistré (0 MAD).</td></tr>';
     }
   }
 
@@ -1729,10 +2079,189 @@
   function renderCleanings() {
     var body = document.getElementById('cleanBody');
     if (!body) return;
-    body.innerHTML = cleanings.map(function(c) {
-      return '<tr><td>' + esc(c.property) + '</td><td>' + c.date + '</td><td>' + c.type + '</td><td>' + c.duration + '</td><td><span class="status-badge ' + c.status + '">' + c.status + '</span></td>' +
-        '<td><div class="row-actions"><button class="btn-icon"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
-    }).join('') || '<tr><td colspan="6" class="muted">Aucun menage.</td></tr>';
+    body.innerHTML = cleanings.map(function(c, i) {
+      return '<tr><td>' + esc(c.property) + '</td><td>' + c.date + '</td><td>' + c.type + '</td><td>' + c.duration + '</td><td>' + esc(c.assignee || '—') + '</td><td>' + esc(c.cost || '—') + '</td><td><span class="status-badge ' + c.status + '">' + c.status + '</span></td>' +
+        '<td><div class="row-actions"><button class="btn-icon" data-clean-task="' + i + '" title="Fiche tâche"><i class="fas fa-clipboard-list"></i></button><button class="btn-icon" data-edit="cleaning" data-index="' + i + '"><i class="fas fa-pen"></i></button><button class="btn-icon danger" data-del="cleaning" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button></div></td></tr>';
+    }).join('') || '<tr><td colspan="8" class="muted">Aucun menage.</td></tr>';
+  }
+
+  function openCleaningTask(i) {
+    var c = cleanings[i];
+    if (!c) return;
+    var statusOpts = [
+      { v: 'pending', l: 'À faire' }, { v: 'in-progress', l: 'En cours' },
+      { v: 'confirmed', l: 'Terminé' }, { v: 'cancelled', l: 'Problème' }
+    ];
+    openModal('Fiche tâche — ' + (c.property || 'Ménage'),
+      '<div class="task-sheet">' +
+      '<div class="task-meta"><span><i class="fas fa-calendar"></i> ' + esc(c.date || '—') + '</span><span><i class="fas fa-broom"></i> ' + esc(c.type || '—') + '</span><span><i class="fas fa-clock"></i> ' + esc(c.duration || '—') + '</span><span><i class="fas fa-user"></i> ' + esc(c.assignee || 'Non assigné') + '</span></div>' +
+      field('Statut', 'tStatus', c.status || 'pending', { type: 'select', options: statusOpts }) +
+      field('Responsable / équipe', 'tAssignee', c.assignee || '') +
+      field('Coût (DH)', 'tCost', c.cost || '', { type: 'number' }) +
+      field('Facture (nom ou référence)', 'tInvoice', c.invoice || '') +
+      field('Commentaire', 'tComment', c.comment || '') +
+      '<div class="field"><label>Photos avant</label><input type="file" id="tBefore" accept="image/*" multiple><div class="task-photos" id="tBeforeList">' + photoThumbs(c.photosBefore) + '</div></div>' +
+      '<div class="field"><label>Photos après</label><input type="file" id="tAfter" accept="image/*" multiple><div class="task-photos" id="tAfterList">' + photoThumbs(c.photosAfter) + '</div></div>' +
+      '</div>');
+    modalForm._type = 'task';
+    modalForm._index = i;
+    bindTaskPhotos(i);
+  }
+
+  function photoThumbs(list) {
+    if (!list || !list.length) return '<span class="muted">Aucune photo.</span>';
+    return list.map(function (src) { return '<img src="' + esc(src) + '" alt="" class="task-thumb">'; }).join('');
+  }
+
+  function bindTaskPhotos(i) {
+    [['tBefore', 'photosBefore', 'tBeforeList'], ['tAfter', 'photosAfter', 'tAfterList']].forEach(function (cfg) {
+      var input = document.getElementById(cfg[0]);
+      if (!input) return;
+      input.addEventListener('change', function () {
+        var files = Array.prototype.slice.call(input.files || []);
+        if (!files.length) return;
+        var c = cleanings[i];
+        c[cfg[1]] = c[cfg[1]] || [];
+        var pending = files.length;
+        files.forEach(function (file) {
+          if (file.size > 8 * 1024 * 1024) { toast('Image trop lourde : ' + file.name, true); if (--pending === 0) { renderTaskPhotos(cfg[2], c[cfg[1]]); persistOps(); } return; }
+          var reader = new FileReader();
+          reader.onload = function () {
+            compressImage(reader.result, 1280, 0.7, function (out) {
+              c[cfg[1]].push(out);
+              if (--pending === 0) { renderTaskPhotos(cfg[2], c[cfg[1]]); persistOps(); toast('Photo ajoutée à la tâche.'); }
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    });
+  }
+
+  function renderTaskPhotos(id, list) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = photoThumbs(list);
+  }
+
+  function saveCleaningTask(i) {
+    var c = cleanings[i];
+    if (!c) return;
+    var g = function (id) { var el = document.getElementById(id); return el ? el.value : ''; };
+    var old = c.status;
+    c.status = g('tStatus') || c.status;
+    c.assignee = g('tAssignee');
+    c.cost = g('tCost');
+    c.invoice = g('tInvoice');
+    c.comment = g('tComment');
+    logAudit('Ménage', 'Fiche tâche', old, c.status);
+    persistOps();
+    renderCleanings();
+    toast('Fiche tâche enregistrée.');
+    closeModal();
+  }
+
+  /* FICHE BIEN (sous-onglets) */
+  var propDetailTab = 'info';
+  function openPropertyDetail(i) {
+    var p = DB.properties[i];
+    if (!p) return;
+    propDetailTab = 'info';
+    modalForm._type = 'propDetail';
+    modalForm._index = i;
+    renderPropertyDetail(i);
+    modal.hidden = false;
+    setConfirmMode(false);
+  }
+
+  function renderPropertyDetail(i) {
+    var p = DB.properties[i];
+    if (!p) return;
+    modalTitle.textContent = 'Fiche — ' + (p.fr || 'Bien');
+    var name = p.fr || '';
+    var tabs = [
+      { k: 'info', l: 'Infos', i: 'fa-circle-info' },
+      { k: 'photos', l: 'Photos', i: 'fa-image' },
+      { k: 'reservations', l: 'Réservations', i: 'fa-calendar-check' },
+      { k: 'cleaning', l: 'Ménage', i: 'fa-broom' },
+      { k: 'access', l: 'Accès', i: 'fa-key' },
+      { k: 'documents', l: 'Documents', i: 'fa-file-lines' },
+      { k: 'revenue', l: 'Revenus', i: 'fa-euro-sign' }
+    ];
+    var html = '<div class="detail-tabs">' + tabs.map(function (t) {
+      return '<button type="button" class="detail-tab' + (propDetailTab === t.k ? ' active' : '') + '" data-detail-tab="' + t.k + '"><i class="fas ' + t.i + '"></i> ' + t.l + '</button>';
+    }).join('') + '</div><div class="detail-pane" id="detailPane">' + detailPaneHtml(p, name) + '</div>';
+    modalBody.innerHTML = html;
+    modalBody.querySelectorAll('[data-detail-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        propDetailTab = btn.getAttribute('data-detail-tab');
+        modalBody.querySelectorAll('.detail-tab').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var pane = document.getElementById('detailPane');
+        if (pane) pane.innerHTML = detailPaneHtml(p, name);
+      });
+    });
+  }
+
+  function detailPaneHtml(p, name) {
+    if (propDetailTab === 'info') {
+      var typeLabel = { sale: 'Vente', rent: 'Location', renovation: 'Rénovation', decoration: 'Décoration' };
+      return '<dl class="detail-list">' +
+        '<div><dt>Type</dt><dd>' + esc(typeLabel[p.cat] || p.cat || '—') + '</dd></div>' +
+        '<div><dt>Prix</dt><dd>' + esc(p.price || '—') + (p.period ? ' / ' + esc(p.period) : '') + '</dd></div>' +
+        '<div><dt>Ville</dt><dd>' + esc(p.city || '—') + '</dd></div>' +
+        '<div><dt>Pays</dt><dd>' + esc(p.pays || '—') + '</dd></div>' +
+        '<div><dt>Surface</dt><dd>' + esc(p.area || '—') + '</dd></div>' +
+        '<div><dt>Chambres / SDB</dt><dd>' + esc(p.beds || '—') + ' / ' + esc(p.baths || '—') + '</dd></div>' +
+        '<div><dt>Propriétaire</dt><dd>' + esc(p.owner || '—') + '</dd></div>' +
+        '<div><dt>Ajouté le</dt><dd>' + fmtDate(p.createdAt) + '</dd></div>' +
+        '</dl>' + (p.fr ? '<p class="muted" style="margin-top:10px;">' + esc(p.fr) + '</p>' : '');
+    }
+    if (propDetailTab === 'photos') {
+      var photos = (p.photos && p.photos.length) ? p.photos : (p.img ? [p.img] : []);
+      if (!photos.length) return '<p class="muted">Aucune photo sur ce bien.</p>';
+      return '<div class="detail-photos">' + photos.map(function (src, k) {
+        var d = (p.photoDates && p.photoDates[k]) ? fmtDate(p.photoDates[k]) : '';
+        return '<figure><img src="' + esc(src) + '" alt="' + esc(p.alt || name) + '">' + (d ? '<figcaption>' + d + '</figcaption>' : '') + '</figure>';
+      }).join('') + '</div>';
+    }
+    if (propDetailTab === 'reservations') {
+      var res = reservations.filter(function (r) { return (r.property || '') === name || (r.property || '').indexOf(name) > -1; });
+      if (!res.length) return '<p class="muted">Aucune réservation pour ce bien.</p>';
+      return '<div class="table-wrap"><table class="dash-table"><thead><tr><th>Voyageur</th><th>Dates</th><th>Statut</th><th>Montant</th></tr></thead><tbody>' +
+        res.map(function (r) { return '<tr><td>' + esc(r.traveler) + '</td><td>' + esc(r.dates) + '</td><td><span class="status-badge ' + r.status + '">' + r.status + '</span></td><td>' + esc(r.amount) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>';
+    }
+    if (propDetailTab === 'cleaning') {
+      var cl = cleanings.filter(function (c) { return (c.property || '') === name; });
+      if (!cl.length) return '<p class="muted">Aucune tâche ménage pour ce bien.</p>';
+      return '<div class="table-wrap"><table class="dash-table"><thead><tr><th>Date</th><th>Type</th><th>Statut</th><th>Coût</th></tr></thead><tbody>' +
+        cl.map(function (c) { return '<tr><td>' + esc(c.date) + '</td><td>' + esc(c.type) + '</td><td><span class="status-badge ' + c.status + '">' + c.status + '</span></td><td>' + esc(c.cost || '—') + '</td></tr>'; }).join('') +
+        '</tbody></table></div>';
+    }
+    if (propDetailTab === 'access') {
+      var ac = accesses.filter(function (a) { return (a.property || '') === name; });
+      if (!ac.length) return '<p class="muted">Aucun accès enregistré pour ce bien.</p>';
+      return '<div class="table-wrap"><table class="dash-table"><thead><tr><th>Type</th><th>Code</th><th>Serrure</th><th>Statut</th></tr></thead><tbody>' +
+        ac.map(function (a) {
+          var tuya = a.type === 'Tuya' ? 'Connexion requise' : '—';
+          return '<tr><td>' + esc(a.type) + '</td><td>' + esc(a.code || '—') + '</td><td>' + esc(tuya) + '</td><td><span class="status-badge ' + a.status + '">' + a.status + '</span></td></tr>';
+        }).join('') +
+        '</tbody></table></div>';
+    }
+    if (propDetailTab === 'documents') {
+      var docs = documents.filter(function (d) { return (d.property || '') === name; });
+      if (!docs.length) return '<p class="muted">Aucun document rattaché à ce bien.</p>';
+      return '<div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Type</th><th>Expiration</th></tr></thead><tbody>' +
+        docs.map(function (d) { return '<tr><td>' + esc(d.name) + '</td><td>' + esc(d.type) + '</td><td>' + esc(d.expiration || '—') + '</td></tr>'; }).join('') +
+        '</tbody></table></div>';
+    }
+    /* revenus */
+    var rev = 0;
+    reservations.forEach(function (r) {
+      if ((r.property || '') === name) rev += Number(String(r.amount || '').replace(/[^0-9.]/g, '')) || 0;
+    });
+    return '<div class="stat-grid"><div class="stat-card"><div class="stat-icon green"><i class="fas fa-euro-sign"></i></div><div><strong>' + rev.toLocaleString('fr-FR') + '</strong><span>Revenu brut (DH)</span></div></div></div>' +
+      '<p class="muted">Détail commission / dépenses : section Revenus. Stripe non connecté — configuration requise.</p>';
   }
 
   /* MAINTENANCE */
@@ -1740,9 +2269,9 @@
   function renderMaintenances() {
     var body = document.getElementById('maintBody');
     if (!body) return;
-    body.innerHTML = maintenances.map(function(m) {
+    body.innerHTML = maintenances.map(function(m, i) {
       return '<tr><td>' + esc(m.property) + '</td><td>' + esc(m.issue) + '</td><td class="priority-' + m.priority + '">' + m.priority + '</td><td>' + m.date + '</td><td><span class="status-badge ' + m.status + '">' + m.status + '</span></td>' +
-        '<td><div class="row-actions"><button class="btn-icon"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
+        '<td><div class="row-actions"><button class="btn-icon" data-edit="maintenance" data-index="' + i + '"><i class="fas fa-pen"></i></button><button class="btn-icon danger" data-del="maintenance" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button></div></td></tr>';
     }).join('') || '<tr><td colspan="6" class="muted">Aucune maintenance.</td></tr>';
   }
 
@@ -1751,10 +2280,17 @@
   function renderAccesses() {
     var body = document.getElementById('accessBody');
     if (!body) return;
-    body.innerHTML = accesses.map(function(a) {
-      return '<tr><td>' + esc(a.property) + '</td><td>' + a.type + '</td><td>' + a.code + '</td><td>' + a.date + '</td><td><span class="status-badge ' + a.status + '">' + a.status + '</span></td>' +
-        '<td><div class="row-actions"><button class="btn-icon"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
-    }).join('') || '<tr><td colspan="6" class="muted">Aucun acces.</td></tr>';
+    body.innerHTML = accesses.map(function(a, i) {
+      var lockLabel = a.type === 'Tuya' ? 'Connexion requise' : '—';
+      if (a.lock === 'open') lockLabel = 'Ouverte';
+      else if (a.lock === 'closed') lockLabel = 'Fermée';
+      var battery = a.battery != null && a.battery !== '' ? a.battery + '%' : '—';
+      var lastOpen = a.lastOpen ? new Date(a.lastOpen).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+      return '<tr><td>' + esc(a.property) + '</td><td>' + a.type + '</td><td>' + a.code + '</td>' +
+        '<td>' + esc(lockLabel) + '</td><td>' + esc(battery) + '</td><td class="muted" style="font-size:0.78rem;">' + esc(lastOpen) + '</td>' +
+        '<td>' + esc(a.temp || '—') + '</td><td>' + a.date + '</td><td><span class="status-badge ' + a.status + '">' + a.status + '</span></td>' +
+        '<td><div class="row-actions"><button class="btn-icon" data-edit="access" data-index="' + i + '"><i class="fas fa-pen"></i></button><button class="btn-icon danger" data-del="access" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button></div></td></tr>';
+    }).join('') || '<tr><td colspan="10" class="muted">Aucun acces.</td></tr>';
   }
 
   /* CONFORMITÉ */
@@ -1900,12 +2436,31 @@
 
   /* DOCUMENTS */
   var documents = [];
+  function docExpirationBadge(d) {
+    if (!d.expiration) return '<span class="muted">—</span>';
+    var exp = parseIso(d.expiration);
+    if (!exp) return esc(d.expiration);
+    var now = new Date(); now.setHours(0, 0, 0, 0);
+    var days = Math.round((exp - now) / 86400000);
+    var reminder = Number(d.reminder) || 30;
+    if (days < 0) return '<span class="status-badge cancelled">Expiré</span> ' + esc(d.expiration);
+    if (days <= reminder) return '<span class="status-badge in-progress">Dans ' + days + ' j</span> ' + esc(d.expiration);
+    return esc(d.expiration);
+  }
   function renderDocuments() {
     var body = document.getElementById('docBody');
     if (!body) return;
-    body.innerHTML = documents.map(function(d) {
-      return '<tr><td><div class="doc-item"><i class="fas fa-file-pdf doc-icon"></i><div class="doc-info"><div class="doc-name">' + esc(d.name) + '</div><div class="doc-meta">' + d.type + ' · ' + d.size + ' · ' + d.date + '</div></div></div></td><td><button class="btn-icon"><i class="fas fa-download"></i></button></td></tr>';
-    }).join('') || '<tr><td colspan="5" class="muted">Aucun document.</td></tr>';
+    body.innerHTML = documents.map(function(d, i) {
+      var hasFile = !!(d.content && d.content.length);
+      return '<tr><td><div class="doc-item"><i class="fas fa-file-pdf doc-icon"></i><div class="doc-info"><div class="doc-name">' + esc(d.name) + '</div><div class="doc-meta">' + d.type + ' · ' + d.size + ' · ' + d.date + '</div></div></div></td>' +
+        '<td>' + esc(d.property || '—') + '</td><td>' + esc(d.type || '—') + '</td><td>' + esc(d.size || '—') + '</td><td>' + esc(d.date || '—') + '</td>' +
+        '<td>' + docExpirationBadge(d) + '</td><td>' + (d.reminder ? esc(d.reminder) + ' j avant' : '—') + '</td>' +
+        '<td><div class="row-actions">' +
+        '<button class="btn-icon" data-doc-upload="' + i + '" title="Joindre un fichier"><i class="fas fa-upload"></i></button>' +
+        '<button class="btn-icon" data-doc-dl="' + i + '" title="Télécharger"><i class="fas fa-download"></i></button>' +
+        '<button class="btn-icon danger" data-doc-del="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button>' +
+        '</div></td></tr>';
+    }).join('') || '<tr><td colspan="8" class="muted">Aucun document.</td></tr>';
   }
 
   /* NOTIFICATIONS */
@@ -1938,13 +2493,16 @@
 
   /* AUTOMATISATIONS (center) */
   var automations = [
-    { trigger: 'Nouvelle réservation', action: 'Créer tâche ménage + notifier', active: true, last: '—' },
-    { trigger: 'Départ voyageur', action: 'Programmer contrôle logement', active: true, last: '—' },
-    { trigger: 'Arrivée voyageur', action: 'Préparer message d\u2019accueil', active: false, last: '—' },
-    { trigger: 'Document proche expiration', action: 'Alerte gestionnaire', active: true, last: '—' },
-    { trigger: 'Paiement reçu', action: 'Mettre à jour dossier', active: true, last: '—' },
-    { trigger: 'Réservation annulée', action: 'Libérer calendrier', active: false, last: '—' },
-    { trigger: 'Anomalie calendrier', action: 'Notification admin', active: true, last: '—' }
+    { trigger: 'Nouvelle réservation', action: 'Créer tâche ménage + notifier gestionnaire', active: true, last: '—' },
+    { trigger: 'Check-out effectué', action: 'Créer tâche ménage sortie + contrôle logement', active: true, last: '—' },
+    { trigger: 'Réservation confirmée', action: 'Préparer email d\'accueil + code d\'accès', active: true, last: '—' },
+    { trigger: 'Arrivée dans 24 h', action: 'Message WhatsApp voyageur (itinéraire, check-in)', active: true, last: '—' },
+    { trigger: 'Document proche expiration', action: 'Alerte gestionnaire (rappel configurable)', active: true, last: '—' },
+    { trigger: 'Maintenance créée', action: 'Notifier le prestataire assigné', active: false, last: '—' },
+    { trigger: 'Paiement reçu', action: 'Mettre à jour dossier + facture', active: true, last: '—' },
+    { trigger: 'Réservation annulée', action: 'Libérer calendrier + notifier propriétaire', active: false, last: '—' },
+    { trigger: 'Occupation basse 7 jours', action: 'Alerte tarif + suggestion promo (validation 🟠)', active: false, last: '—' },
+    { trigger: 'Avis voyageur reçu', action: 'Notifier + archiver rapport propriétaire', active: true, last: '—' }
   ];
   function renderAutomations() {
     var body = document.getElementById('autoBody');
@@ -1969,10 +2527,136 @@
   function renderOwners() {
     var body = document.getElementById('ownerBody');
     if (!body) return;
-    body.innerHTML = owners.map(function(o) {
+    body.innerHTML = owners.map(function(o, i) {
       return '<tr><td>' + esc(o.name) + '</td><td>' + esc(o.email) + '</td><td>' + esc(o.phone) + '</td><td>' + o.props + '</td><td>' + o.commission + '</td>' +
-        '<td><div class="row-actions"><button class="btn-icon"><i class="fas fa-pen"></i></button><button class="btn-icon danger"><i class="fas fa-trash"></i></button></div></td></tr>';
+        '<td><div class="row-actions"><button class="btn-icon" data-edit="owner" data-index="' + i + '"><i class="fas fa-pen"></i></button><button class="btn-icon danger" data-del="owner" data-index="' + i + '" title="Supprimer"><i class="fas fa-trash"></i></button></div></td></tr>';
     }).join('') || '<tr><td colspan="6" class="muted">Aucun proprietaire.</td></tr>';
+  }
+
+  /* ---------- ESPACE PROPRIÉTAIRE ---------- */
+  function renderOwnerPortal() {
+    var sel = document.getElementById('ownerPortalSelect');
+    if (sel && !sel._filled) {
+      owners.forEach(function (o) {
+        var opt = document.createElement('option');
+        opt.value = o.name; opt.textContent = o.name;
+        sel.appendChild(opt);
+      });
+      sel._filled = true;
+      sel.addEventListener('change', function () { renderOwnerPortal(); });
+    }
+    var name = sel ? sel.value : '';
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    if (!name) {
+      set('opProps', '0'); set('opRes', '0'); set('opRev', '0 MAD'); set('opDocs', '0');
+      var pb = document.getElementById('opPropsBody');
+      var rb = document.getElementById('opResBody');
+      var db = document.getElementById('opDocsBody');
+      if (pb) pb.innerHTML = '<tr><td colspan="4" class="muted">Sélectionnez un propriétaire pour afficher son espace.</td></tr>';
+      if (rb) rb.innerHTML = '<tr><td colspan="5" class="muted">—</td></tr>';
+      if (db) db.innerHTML = '<tr><td colspan="3" class="muted">—</td></tr>';
+      return;
+    }
+    var owner = owners.filter(function (o) { return o.name === name; })[0];
+    var props = DB.properties.filter(function (p) { return (p.owner || '') === name || (p.fr && (p.city || '').indexOf(name) > -1 && false); });
+    if (!props.length) props = DB.properties.filter(function (p) { return (p.owner || '') === name; });
+    var propNames = {};
+    props.forEach(function (p) { propNames[p.fr] = 1; });
+    var res = reservations.filter(function (r) { return propNames[r.property] || (r.property || '').indexOf(name) > -1; });
+    var docs = documents.filter(function (d) { return propNames[d.property] || (d.property || '') === name; });
+    var commRate = owner ? (parseFloat(owner.commission) || 0) : 0;
+    var gross = 0;
+    res.forEach(function (r) { gross += Number(String(r.amount || '').replace(/[^0-9.]/g, '')) || 0; });
+    var net = Math.round(gross * (100 - commRate) / 100);
+    set('opProps', String(props.length));
+    set('opRes', String(res.length));
+    set('opRev', net.toLocaleString('fr-FR') + ' MAD');
+    set('opDocs', String(docs.length));
+    var pb2 = document.getElementById('opPropsBody');
+    if (pb2) pb2.innerHTML = props.length
+      ? props.map(function (p) { return '<tr><td>' + esc(p.fr) + '</td><td>' + esc(p.city || '—') + '</td><td>' + esc(p.price || '—') + '</td><td><span class="status-badge confirmed">Actif</span></td></tr>'; }).join('')
+      : '<tr><td colspan="4" class="muted">Aucun bien enregistré pour ce propriétaire.</td></tr>';
+    var rb2 = document.getElementById('opResBody');
+    if (rb2) rb2.innerHTML = res.length
+      ? res.map(function (r) { return '<tr><td>' + esc(r.traveler) + '</td><td>' + esc(r.property) + '</td><td>' + esc(r.dates) + '</td><td><span class="status-badge ' + r.status + '">' + r.status + '</span></td><td>' + esc(r.amount) + '</td></tr>'; }).join('')
+      : '<tr><td colspan="5" class="muted">Aucune réservation.</td></tr>';
+    var db2 = document.getElementById('opDocsBody');
+    if (db2) db2.innerHTML = docs.length
+      ? docs.map(function (d) { return '<tr><td>' + esc(d.name) + '</td><td>' + esc(d.type) + '</td><td>' + esc(d.expiration || '—') + '</td></tr>'; }).join('')
+      : '<tr><td colspan="3" class="muted">Aucun document.</td></tr>';
+  }
+
+  function exportOwnerReport() {
+    var sel = document.getElementById('ownerPortalSelect');
+    var name = sel ? sel.value : '';
+    if (!name) { toast('Sélectionnez d\'abord un propriétaire.', true); return; }
+    var rows = [['Type', 'Titre / Bien', 'Détail', 'Montant / Statut']];
+    DB.properties.filter(function (p) { return (p.owner || '') === name; }).forEach(function (p) {
+      rows.push(['Bien', p.fr || '', p.city || '', p.price || '']);
+    });
+    reservations.filter(function (r) { return (r.property || '').indexOf(name) > -1 || (r.owner || '') === name; }).forEach(function (r) {
+      rows.push(['Réservation', r.property || '', r.dates || '', (r.amount || '') + ' ' + (r.status || '')]);
+    });
+    documents.filter(function (d) { return (d.property || '') === name; }).forEach(function (d) {
+      rows.push(['Document', d.name || '', d.type || '', d.expiration || '']);
+    });
+    var csv = rows.map(function (r) {
+      return r.map(function (c) { return '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"'; }).join(';');
+    }).join('\n');
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'rapport-' + name.replace(/[^\w-]+/g, '_').toLowerCase() + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    logAudit('Rapport propriétaire', 'Export CSV', '', name);
+    toast('Rapport CSV exporté.');
+  }
+
+  /* Préférences notifications */
+  function initNotifPrefs() {
+    var box = document.getElementById('notifPrefs');
+    if (!box || box._bound) return;
+    box._bound = true;
+    var prefs = { email: true, push: false, whatsapp: true, inapp: true };
+    try {
+      var raw = localStorage.getItem('darmaroc-notif-prefs');
+      if (raw) prefs = Object.assign(prefs, JSON.parse(raw));
+    } catch (e) {}
+    box.querySelectorAll('[data-pref]').forEach(function (input) {
+      var key = input.getAttribute('data-pref');
+      input.checked = !!prefs[key];
+      input.addEventListener('change', function () {
+        prefs[key] = input.checked;
+        try { localStorage.setItem('darmaroc-notif-prefs', JSON.stringify(prefs)); } catch (e) {}
+        logAudit('Notifications', 'Préférence ' + key, String(!input.checked), String(input.checked));
+        toast('Préférence enregistrée : ' + key);
+      });
+    });
+    var exportBtn = document.getElementById('ownerExportBtn');
+    if (exportBtn && !exportBtn._bound) {
+      exportBtn._bound = true;
+      exportBtn.addEventListener('click', exportOwnerReport);
+    }
+  }
+
+  function bindCalendarToolbar() {
+    var prev = document.getElementById('calPrev');
+    var next = document.getElementById('calNext');
+    var today = document.getElementById('calToday');
+    function shift(dir) {
+      if (calMode === 'day') calDate.setDate(calDate.getDate() + dir);
+      else if (calMode === 'week') calDate.setDate(calDate.getDate() + 7 * dir);
+      else calDate.setMonth(calDate.getMonth() + dir);
+      calDate = new Date(calDate);
+      renderCalendar();
+    }
+    if (prev && !prev._bound) { prev._bound = true; prev.addEventListener('click', function () { shift(-1); }); }
+    if (next && !next._bound) { next._bound = true; next.addEventListener('click', function () { shift(1); }); }
+    if (today && !today._bound) { today._bound = true; today.addEventListener('click', function () { calDate = new Date(); renderCalendar(); }); }
   }
 
 
@@ -1980,6 +2664,14 @@
   window.testConnection = function(platform) {
     toast('Test de connexion a ' + platform + ' en cours...');
   };
+
+  /* Stripe : état honnête — branchement sans afficher de clés */
+  function stripeConnectFlow() {
+    var st = channels.filter(function (c) { return c.platform === 'Stripe'; })[0];
+    if (!st) return;
+    logChannel('Stripe', 'Configuration demandée. Renseigner la clé secrète côté serveur uniquement (dashboard > Canaux > Connecter) — jamais affichée en clair.');
+    toast('Stripe : configuration requise. Aucune clé n\'est affichée ici (§9).');
+  }
 
   /* Connectors data */
   var connectors = [];
@@ -2038,8 +2730,11 @@
     if (!body) return;
     body.innerHTML = pricing.map(function (p, i) {
       return '<tr><td>' + esc(p.property) + '</td><td>' + esc(p.current) + '</td><td>' + esc(p.recommended || '—') + '</td><td>' + esc(p.min || '—') + '</td><td>' + esc(p.max || '—') + '</td><td>' + esc(p.season || '—') + '</td>' +
+        '<td class="muted" style="font-size:0.78rem;">' + esc(p.history || '—') + '</td>' +
+        '<td>' + esc(p.demand || '—') + '</td>' +
+        '<td class="muted" style="font-size:0.78rem;">' + esc(p.events || '—') + '</td>' +
         '<td><div class="row-actions">' + (p.recommended ? '<button class="btn-icon" data-price-accept="' + i + '" title="Accepter"><i class="fas fa-check"></i></button><button class="btn-icon danger" data-price-reject="' + i + '" title="Refuser"><i class="fas fa-xmark"></i></button>' : '<span class="muted">—</span>') + '</div></td></tr>';
-    }).join('') || '<tr><td colspan="7" class="muted">Aucune tarification configurée. PriceLabs non connecté.</td></tr>';
+    }).join('') || '<tr><td colspan="10" class="muted">Aucune tarification configurée. PriceLabs non connecté.</td></tr>';
     var note = document.getElementById('priceAiNote');
     if (note) note.textContent = pricing.some(function (p) { return p.recommended; })
       ? 'Le tarif recommandé a changé parce que la demande prévue pour cette période est différente. Accepter ou refuser la recommandation.'
@@ -2082,24 +2777,28 @@
     set('kpiDocs', String(documents.length));
     var ai = document.getElementById('aiOverview');
     if (ai) {
-      var lines = [];
+      var alerts = [];
       var newArr = reservations.filter(function (r) { return r.status === 'pending'; }).length;
-      if (newArr) lines.push(newArr + ' nouvelle(s) réservation(s) en attente');
+      if (newArr) alerts.push({ text: newArr + ' réservation(s) en attente', explain: 'Des voyageurs ont demandé un séjour sans confirmation — confirmez ou refusez pour libérer le calendrier.', action: 'Ouvrir réservations', view: 'reservations' });
       var arr = reservations.filter(function (r) { return r.arrival === today; }).length;
-      if (arr) lines.push(arr + ' arrivée(s) aujourd’hui');
-      var cl = cleanings.filter(function (c) { return c.status !== 'done'; }).length;
-      if (cl) lines.push(cl + ' tâche(s) ménage');
-      if (documents.length) lines.push(documents.length + ' document(s) à vérifier');
+      if (arr) alerts.push({ text: arr + ' arrivée(s) aujourd\'hui', explain: 'Préparez les codes d\'accès et vérifiez l\'état du ménage avant 15 h.', action: 'Voir calendrier', view: 'calendar' });
+      var cl = cleanings.filter(function (c) { return c.status !== 'done' && c.status !== 'confirmed'; }).length;
+      if (cl) alerts.push({ text: cl + ' tâche(s) ménage', explain: 'Des tâches restent ouvertes — assignez un responsable et renseignez photos avant/après dans la fiche.', action: 'Ouvrir ménage', view: 'cleaning' });
+      var mt = maintenances.filter(function (m) { return m.status !== 'done' && m.status !== 'confirmed'; }).length;
+      if (mt) alerts.push({ text: mt + ' intervention(s) maintenance', explain: 'Priorisez les pannes haute priorité avant les prochaines arrivées.', action: 'Ouvrir maintenance', view: 'maintenance' });
+      var expDocs = documents.filter(function (d) { return d.expiration && parseIso(d.expiration) && parseIso(d.expiration) < new Date(); }).length;
+      if (expDocs) alerts.push({ text: expDocs + ' document(s) expiré(s)', explain: 'Renouvelez les documents concernés — vérification humaine nécessaire pour toute obligation légale.', action: 'Ouvrir documents', view: 'documents' });
       var un = notifications.filter(function (n) { return n.unread; }).length;
-      if (un) lines.push(un + ' anomalie(s)/notification(s)');
-      ai.innerHTML = lines.length
-        ? lines.map(function (l) { return '<div class="ai-indicator pending" style="display:block;margin:4px 0;"><i class="fas fa-circle-info"></i> ' + esc(l) + ' — <button class="btn-icon" style="width:auto;padding:2px 8px;height:auto;" data-ai-action="1">Agir</button></div>'; }).join('')
+      if (un) alerts.push({ text: un + ' notification(s) non lue(s)', explain: 'Consultez les alertes in-app pour ne manquer aucun événement opérationnel.', action: 'Ouvrir notifications', view: 'notifications' });
+      ai.innerHTML = alerts.length
+        ? alerts.map(function (a) { return '<div class="ai-indicator pending" style="display:block;margin:6px 0;"><i class="fas fa-circle-info"></i> <strong>' + esc(a.text) + '</strong><div class="muted" style="margin:2px 0 4px 18px;font-size:0.85rem;">' + esc(a.explain) + '</div><button class="btn-icon" style="width:auto;padding:2px 10px;height:auto;margin-left:18px;" data-ai-action="' + esc(a.view) + '">' + esc(a.action) + '</button></div>'; }).join('')
         : '<div class="ai-indicator online"><i class="fas fa-circle-check"></i> Rien à signaler pour le moment.</div>';
     }
   }
 
   function renderAllExtended() {
     renderOverviewKPIs();
+    bindCalendarToolbar();
     renderCalendar();
     renderReservations();
     renderWebhooks();
@@ -2116,10 +2815,12 @@
     renderReports();
     renderAutomations();
     renderOwners();
+    renderOwnerPortal();
     renderPrestataires();
     renderTarifs();
     renderAudit();
     renderRoles();
+    initNotifPrefs();
   }
 
   /* ---------- Navigation 19 sections ---------- */
@@ -2138,7 +2839,8 @@
       automations: 'Automatisations', services: 'Services', categories: 'Categories', testimonials: 'Temoignages',
       faq: 'FAQ', contacts: 'Contacts', documents: 'Documents', notifications: 'Notifications',
       reports: 'Rapports', settings: 'Reglages', users: 'Utilisateurs',
-      prestataires: 'Prestataires', pricing: 'Tarification', audit: 'Journal d\u2019activite', roles: 'Roles & permissions'
+      prestataires: 'Prestataires', pricing: 'Tarification', audit: 'Journal d\u2019activite', roles: 'Roles & permissions',
+      'owner-portal': 'Espace proprietaire'
     };
     var titleEl = document.getElementById('viewTitle');
     if (titleEl) titleEl.textContent = titles[view] || 'Tableau de bord';

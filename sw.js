@@ -1,6 +1,6 @@
 /* DarMaroc - Service Worker (PWA) v1.8.0 */
-const VERSION = 'darmaroc-v1.9.2';
-const CORE_CACHE = 'darmaroc-core-v22';
+const VERSION = 'darmaroc-v1.9.3';
+const CORE_CACHE = 'darmaroc-core-v23';
 const IMAGE_CACHE = 'darmaroc-images-v2';
 const API_CACHE = 'darmaroc-api-v1';
 

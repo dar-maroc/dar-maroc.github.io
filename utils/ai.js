@@ -227,14 +227,29 @@
 
   /* ---------- Génération de contenu (dashboard AI Manager) ---------- */
   function generate(type) {
+    var props = getProperties();
+    var sample = (props || []).slice(0, 3).map(function (p) {
+      return (p.fr || p.name || '') + ' — ' + (p.city || '') + ' — ' + (p.price || '') + (p.period ? ' / ' + p.period : '');
+    }).join('\n');
     var prompts = {
-      description: 'Rédige une description immobilière attractive en français pour un bien DarMaroc à Agadir : style, lumineux, proche commodités, appel à l\'action. 80 mots max.',
-      social: 'Crée un post réseaux sociaux FR pour DarMaroc (immobilier Agadir) : emoji, 3 hashtags, lien WhatsApp. Court et percutant.',
+      description: 'Rédige une description immobilière attractive en français pour un bien DarMaroc à Agadir : style, lumineux, proche commodités, appel à l\'action. 80 mots max.\nBiens réels du catalogue :\n' + (sample || '(aucun bien enregistré — invente un bien Agadir plausible et indique que c\'est un exemple)'),
+      social: 'Crée un post réseaux sociaux FR pour DarMaroc (immobilier Agadir) : emoji, 3 hashtags, lien WhatsApp. Court et percutant.\nRéférence catalogue :\n' + (sample || 'Agadir'),
       email: 'Rédige un email professionnel de bienvenue à un voyageur DarMaroc : arrivée, check-in, contacts utiles. 100 mots max.'
     };
     var hint = prompts[type] || prompts.description;
     if (!KEY) {
-      return Promise.resolve('[Mode local — clé Gemini non configurée]\n\n' + hint + '\n\nConfigurez ai.gemini.apiKey dans config/site-config.js pour générer le contenu réel.');
+      var body = 'Sujet : ' + (type === 'social' ? 'post réseaux' : type === 'email' ? 'email voyageur' : 'description bien') + '\n\n';
+      if (type === 'description') {
+        body += sample
+          ? 'Exemple à partir du bien : ' + (props[0].fr || '') + ' à ' + (props[0].city || 'Agadir') + '.\n\n' + hint
+          : hint;
+        body += '\n\n[Mode local — clé Gemini non configurée. Configurez ai.gemini.apiKey pour la génération réelle.]';
+      } else if (type === 'social') {
+        body += '🏡 DarMaroc — ' + (sample ? (props[0].fr || 'Bien à Agadir') : 'Votre bien à Agadir') + '\n✨ Clé en main, vue mer, proche plage.\n📲 Devis WhatsApp : lien DarMaroc\n\n#ImmobilierAgadir #DarMaroc #GestionLocative\n\n[Mode local — aperçu réutilisable, Gemini non configuré.]';
+      } else {
+        body += 'Objet : Votre arrivée DarMaroc\n\nBonjour,\n\nNous vous accueillons à [logement]. Check-in à partir de 15 h. Votre code d\'accès vous sera envoyé la veille.\n\nContacts utiles : WhatsApp DarMaroc.\n\nCordialement,\nL\'équipe DarMaroc\n\n[Mode local — Gemini non configuré.]';
+      }
+      return Promise.resolve(body);
     }
     return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent?key=' + encodeURIComponent(KEY), {
       method: 'POST',
@@ -253,7 +268,7 @@
   }
 
   window.DarMarocAI = {
-    VERSION: 'v1.1',
+    VERSION: 'v1.2',
     ask: ask,
     search: searchProperties,
     getProperties: getProperties,

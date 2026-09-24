@@ -3366,3 +3366,47 @@ a[href^="tel:"], .top-bar-links a[href^="tel:"] {
 @media (max-width: 640px) {
   .gestion-conciergerie .gestion-cta .btn { width: 100%; }
 }
+
+/* ==================== PROPERTY CARDS — 3D CSS (§13) ==================== */
+.properties-grid { perspective: 1200px; }
+.property-card {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.property-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(212,175,55,0.12), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.property-card:hover::before { opacity: 1; }
+.property-card:hover {
+  transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) translateY(-8px);
+  border-color: var(--border-gold);
+  box-shadow:
+    0 25px 50px rgba(0,0,0,0.35),
+    12px 8px 24px rgba(0,0,0,0.25),
+    -4px 0 16px rgba(212,175,55,0.12);
+}
+.property-image { transform: translateZ(30px); }
+.property-body { transform: translateZ(18px); }
+@media (max-width: 768px) {
+  .property-card:hover { transform: none; }
+  .property-image,
+  .property-body { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .property-card,
+  .property-card:hover,
+  .property-image,
+  .property-body {
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none;
+  }
+}

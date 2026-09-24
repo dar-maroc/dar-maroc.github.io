@@ -53,6 +53,7 @@
       <a href="#" class="nav-link" data-view="reports"><i class="fas fa-file-lines"></i> Rapports</a>
       <a href="#" class="nav-link" data-view="audit"><i class="fas fa-clock-rotate-left"></i> Journal d'activite</a>
       <a href="#" class="nav-link" data-view="roles"><i class="fas fa-user-shield"></i> Roles</a>
+      <a href="#" class="nav-link" data-view="owner-portal"><i class="fas fa-house-user"></i> Espace propriétaire</a>
       <a href="#" class="nav-link" data-view="users"><i class="fas fa-users"></i> Utilisateurs</a>
       <a href="#" class="nav-link" data-view="settings"><i class="fas fa-gear"></i> Reglages</a>
     </nav>
@@ -315,8 +316,29 @@
           <h3>Calendrier — planning des interventions</h3>
           <button class="btn-add" data-new="calendar-event"><i class="fas fa-plus"></i> Ajouter</button>
         </div>
+        <div class="cal-toolbar">
+          <div class="cal-modes" role="group" aria-label="Vue calendrier">
+            <button type="button" class="cal-mode" data-cal-mode="day">Jour</button>
+            <button type="button" class="cal-mode" data-cal-mode="week">Semaine</button>
+            <button type="button" class="cal-mode active" data-cal-mode="month">Mois</button>
+          </div>
+          <button type="button" class="btn-icon" id="calPrev" title="Période précédente"><i class="fas fa-chevron-left"></i></button>
+          <span id="calLabel" class="cal-label"></span>
+          <button type="button" class="btn-icon" id="calNext" title="Période suivante"><i class="fas fa-chevron-right"></i></button>
+          <button type="button" class="btn-icon" id="calToday" title="Aujourd'hui"><i class="fas fa-calendar-day"></i></button>
+          <select id="calProperty" aria-label="Filtrer par logement"><option value="">Tous les logements</option></select>
+        </div>
         <div class="card"><div class="calendar-grid" id="calendarGrid"></div></div>
-        <p class="muted">Jour / semaine / mois par logement : réservations, arrivées, départ, blocage, maintenance, ménage. Synchronisation iCal / Airbnb / Booking / Expedia via la page Canaux.</p>
+        <div class="card cal-legend">
+          <span><i class="dot res"></i> Réservation</span>
+          <span><i class="dot arr"></i> Arrivée</span>
+          <span><i class="dot dep"></i> Départ</span>
+          <span><i class="dot clean"></i> Ménage</span>
+          <span><i class="dot maint"></i> Maintenance</span>
+          <span><i class="dot block"></i> Blocage</span>
+          <span><i class="dot access"></i> Accès</span>
+        </div>
+        <p class="muted">Réservations, arrivées, départs, blocages, maintenance et ménage — filtrables par logement. Synchronisation iCal / Airbnb / Booking / Expedia via la page Canaux.</p>
       </section>
 
       <!-- RESERVATIONS -->
@@ -328,7 +350,7 @@
       <!-- VOYAGEURS -->
       <section id="view-travelers" class="view">
         <div class="view-head"><h3>Voyageurs</h3><button class="btn-add" data-new="traveler"><i class="fas fa-plus"></i> Ajouter</button></div>
-        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Pays</th><th>Dernière visite</th><th>Actions</th></tr></thead><tbody id="travelerBody"></tbody></table></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Pays / Nationalité</th><th>Passeport</th><th>Contact préféré</th><th>Séjours</th><th>Total (DH)</th><th>Fidélité</th><th>Dernière visite</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="travelerBody"></tbody></table></div>
       </section>
 
       <!-- REVENUS -->
@@ -340,15 +362,15 @@
           <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-coins"></i></div><div><strong id="revPaid">0</strong><span>Payés</span></div></div>
           <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-clock"></i></div><div><strong id="revPending">0</strong><span>En attente</span></div></div>
         </div>
-        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Voyageur</th><th>Bien</th><th>Montant</th><th>Dates</th><th>Paiement</th><th>Facture</th></tr></thead><tbody id="revBody"></tbody></table></div>
-        <p class="muted" style="padding-top:8px;">Brut, commissions, frais, dépenses et montant propriétaire : Stripe non connecté — configuration requise pour les paiements en ligne.</p>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Voyageur</th><th>Bien</th><th>Montant brut</th><th>Commission</th><th>Frais</th><th>Dépenses</th><th>Propriétaire</th><th>Dates</th><th>Paiement</th><th>Facture</th></tr></thead><tbody id="revBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Commission = % du propriétaire (si renseigné). Frais Stripe et paiements en ligne : « Configuration requise » tant que Stripe n'est pas connecté — aucun montant fictif.</p>
       </section>
 
       <!-- MENAGE -->
       <section id="view-cleaning" class="view">
         <div class="view-head"><h3>Ménage & interventions</h3><button class="btn-add" data-new="cleaning"><i class="fas fa-plus"></i> Ajouter</button></div>
-        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Date</th><th>Type</th><th>Durée</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="cleanBody"></tbody></table></div>
-        <p class="muted" style="padding-top:8px;">Statuts : À faire · Assigné · En cours · Terminé · Problème. Photos avant/après, commentaire, coût et facture : via la fiche tâche.</p>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Date</th><th>Type</th><th>Durée</th><th>Responsable</th><th>Coût</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="cleanBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Statuts : À faire · En cours · Terminé · Problème. Ouvrez la fiche tâche pour photos avant/après, commentaire, coût et facture.</p>
       </section>
 
       <!-- MAINTENANCE -->
@@ -360,8 +382,8 @@
       <!-- ACCES -->
       <section id="view-access" class="view">
         <div class="view-head"><h3>Accès & équipements</h3><button class="btn-add" data-new="access"><i class="fas fa-plus"></i> Ajouter</button></div>
-        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Type</th><th>Code / Réf.</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="accessBody"></tbody></table></div>
-        <p class="muted" style="padding-top:8px;">Serrures connectées Tuya : « Connexion requise » tant que l'API/appareil n'est pas configuré — aucun faux contrôle.</p>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Type</th><th>Code / Réf.</th><th>Serrure (Tuya)</th><th>Batterie</th><th>Dernière ouverture</th><th>Accès temporaire</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="accessBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Serrures connectées Tuya : « Connexion requise » tant que l'API/appareil n'est pas configuré — aucun faux contrôle à distance.</p>
       </section>
 
       <!-- CONFORMITE -->
@@ -411,12 +433,23 @@
       <!-- DOCUMENTS -->
       <section id="view-documents" class="view">
         <div class="view-head"><h3>Documents</h3><button class="btn-add" data-new="document"><i class="fas fa-plus"></i> Ajouter</button></div>
-        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Action</th></tr></thead><tbody id="docBody"></tbody></table></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Bien</th><th>Type</th><th>Taille</th><th>Ajouté le</th><th>Expiration</th><th>Rappel</th><th>Actions</th></tr></thead><tbody id="docBody"></tbody></table></div>
+        <p class="muted" style="padding-top:8px;">Upload local (fichier lu dans le navigateur) ou Supabase Storage si configuré. L'expiration déclenche un rappel dans les notifications — aucune obligation légale n'est inventée.</p>
       </section>
 
       <!-- NOTIFICATIONS -->
       <section id="view-notifications" class="view">
         <div class="view-head"><h3>Notifications</h3><button class="btn-add" id="notifReadAll"><i class="fas fa-check-double"></i> Tout lire</button></div>
+        <div class="card">
+          <h3>Préférences de notification</h3>
+          <div class="notif-prefs" id="notifPrefs">
+            <label class="toggle-row"><span><i class="fas fa-envelope"></i> E-mail</span><input type="checkbox" data-pref="email" checked></label>
+            <label class="toggle-row"><span><i class="fas fa-mobile-screen"></i> Push navigateur</span><input type="checkbox" data-pref="push"></label>
+            <label class="toggle-row"><span><i class="fab fa-whatsapp"></i> WhatsApp</span><input type="checkbox" data-pref="whatsapp" checked></label>
+            <label class="toggle-row"><span><i class="fas fa-bell"></i> In-app (dashboard)</span><input type="checkbox" data-pref="inapp" checked></label>
+          </div>
+          <p class="muted" style="margin-top:8px;">Les préférences sont enregistrées localement et tracées dans le journal d'activité.</p>
+        </div>
         <div id="notifList"></div>
       </section>
 
@@ -454,7 +487,7 @@
       <!-- TARIFICATION -->
       <section id="view-pricing" class="view">
         <div class="view-head"><h3>Tarification</h3><button class="btn-add" data-new="pricing"><i class="fas fa-plus"></i> Ajouter</button></div>
-        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Prix actuel</th><th>Recommandé</th><th>Min</th><th>Max</th><th>Saison</th><th>Décision</th></tr></thead><tbody id="priceBody"></tbody></table></div>
+        <div class="table-wrap"><table class="dash-table"><thead><tr><th>Bien</th><th>Prix actuel</th><th>Recommandé</th><th>Min</th><th>Max</th><th>Saison</th><th>Historique</th><th>Demande</th><th>Événements</th><th>Décision</th></tr></thead><tbody id="priceBody"></tbody></table></div>
         <div class="card" style="margin-top:16px;"><h3>Analyse IA</h3><p id="priceAiNote" class="muted"></p></div>
       </section>
 
@@ -469,6 +502,27 @@
         <div class="view-head"><h3>Rôles & permissions</h3></div>
         <div class="table-wrap"><table class="dash-table"><thead><tr><th>Rôle</th><th>Permissions</th><th>Éditer</th></tr></thead><tbody id="roleBody"></tbody></table></div>
         <p class="muted" style="padding-top:8px;">Rôles : Admin DarMaroc · Gestionnaire · Propriétaire · Prestataire · Lecteur/Support. L’admin peut modifier les permissions.</p>
+      </section>
+
+      <!-- ESPACE PROPRIETAIRE -->
+      <section id="view-owner-portal" class="view">
+        <div class="view-head">
+          <h3>Espace propriétaire</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select id="ownerPortalSelect" aria-label="Choisir un propriétaire"><option value="">Sélectionner…</option></select>
+            <button class="btn-add" id="ownerExportBtn"><i class="fas fa-file-csv"></i> Exporter rapport CSV</button>
+          </div>
+        </div>
+        <p class="muted">Vue dédiée : uniquement les biens, réservations, revenus et documents du propriétaire sélectionné. Aperçu local du portail — pas de faux espace distant.</p>
+        <div class="stat-grid" style="margin-top:12px;">
+          <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-house"></i></div><div><strong id="opProps">0</strong><span>Mes biens</span></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div><div><strong id="opRes">0</strong><span>Réservations</span></div></div>
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-euro-sign"></i></div><div><strong id="opRev">0 MAD</strong><span>Revenus nets</span></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-file-lines"></i></div><div><strong id="opDocs">0</strong><span>Documents</span></div></div>
+        </div>
+        <div class="card"><h3>Mes biens</h3><div class="table-wrap"><table class="dash-table"><thead><tr><th>Titre</th><th>Ville</th><th>Prix</th><th>Statut</th></tr></thead><tbody id="opPropsBody"></tbody></table></div></div>
+        <div class="card"><h3>Mes réservations</h3><div class="table-wrap"><table class="dash-table"><thead><tr><th>Voyageur</th><th>Bien</th><th>Dates</th><th>Statut</th><th>Montant</th></tr></thead><tbody id="opResBody"></tbody></table></div></div>
+        <div class="card"><h3>Mes documents</h3><div class="table-wrap"><table class="dash-table"><thead><tr><th>Nom</th><th>Type</th><th>Expiration</th></tr></thead><tbody id="opDocsBody"></tbody></table></div></div>
       </section>
 
     </div>
