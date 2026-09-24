@@ -392,8 +392,120 @@
     });
   }
 
+  /* ---------- Ops (table ops_state, Phase A) ---------- */
+  function fetchOpsState() {
+    if (!hasBackend()) return Promise.resolve(null);
+    var url = Supabase.restUrl;
+    if (!url) return Promise.resolve(null);
+    var headers = {
+      apikey: Supabase.anonKey,
+      Authorization: 'Bearer ' + Supabase.anonKey
+    };
+    return fetch(url + '/ops_state?key=eq.dashboard&select=data,updated_at', { headers: headers })
+      .then(function (res) {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then(function (rows) {
+        if (!rows || !rows.length) return null;
+        return rows[0].data || null;
+      })
+      .catch(function (e) {
+        try { console.warn('Supabase ops_state fetch:', e); } catch (e2) {}
+        return null;
+      });
+  }
+
+  function pushOpsState(data) {
+    if (!hasBackend()) return Promise.resolve(false);
+    var url = Supabase.restUrl;
+    if (!url) return Promise.resolve(false);
+    var headers = {
+      apikey: Supabase.anonKey,
+      Authorization: 'Bearer ' + Supabase.anonKey,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal,resolution=merge-duplicates'
+    };
+    var row = { key: 'dashboard', data: data, updated_at: new Date().toISOString() };
+    return fetch(url + '/ops_state?on_conflict=key', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify([row])
+    })
+      .then(function (res) { return !!res.ok; })
+      .catch(function (e) {
+        try { console.warn('Supabase ops_state push:', e); } catch (e2) {}
+        return false;
+      });
+  }
+
+  /* ---------- Audit logs ---------- */
+  function pushAudit(entry) {
+    if (!hasBackend() || !entry) return Promise.resolve(false);
+    var url = Supabase.restUrl;
+    if (!url) return Promise.resolve(false);
+    var headers = {
+      apikey: Supabase.anonKey,
+      Authorization: 'Bearer ' + Supabase.anonKey,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal'
+    };
+    var row = {
+      username: entry.user || '',
+      role: entry.role || '',
+      object: entry.object || '',
+      action: entry.action || '',
+      old_v: (entry.oldV || '').slice(0, 500),
+      new_v: (entry.newV || '').slice(0, 500),
+      at: entry.at || new Date().toISOString()
+    };
+    return fetch(url + '/audit_logs', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify([row])
+    })
+      .then(function (res) { return !!res.ok; })
+      .catch(function () { return false; });
+  }
+
+  function fetchAuditLogs(limit) {
+    if (!hasBackend()) return Promise.resolve([]);
+    var url = Supabase.restUrl;
+    if (!url) return Promise.resolve([]);
+    var headers = {
+      apikey: Supabase.anonKey,
+      Authorization: 'Bearer ' + Supabase.anonKey
+    };
+    var n = Number(limit) || 500;
+    return fetch(url + '/audit_logs?select=username,role,object,action,old_v,new_v,at&order=at.desc&limit=' + n, { headers: headers })
+      .then(function (res) {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .then(function (rows) {
+        return (rows || []).map(function (r) {
+          return { user: r.username, role: r.role, object: r.object, action: r.action, oldV: r.old_v, newV: r.new_v, at: r.at };
+        });
+      })
+      .catch(function () { return []; });
+  }
+
+  /* ---------- Storage : document > limite locale ---------- */
+  function uploadDocument(fileName, file) {
+    if (!hasBackend()) return Promise.reject(new Error('Supabase non configuré'));
+    var c = client();
+    if (!c) return Promise.reject(new Error('Client Supabase absent'));
+    var path = 'docs/' + Date.now().toString(36) + '-' + String(fileName || 'doc').replace(/[^a-z0-9.]+/gi, '-').slice(0, 40);
+    return c.storage.from('documents').upload(path, file, { upsert: false, contentType: file.type || undefined })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        var pub = c.storage.from('documents').getPublicUrl(path);
+        return (pub && pub.data && pub.data.publicUrl) || '';
+      });
+  }
+
   window.DarMarocStore = {
-    VERSION: 'v2.3',
+    VERSION: 'v2.4',
     hasBackend: hasBackend,
     fetchCollection: fetchCollection,
     pushCollection: pushCollection,
@@ -401,6 +513,11 @@
     syncImages: syncImages,
     pushSettings: pushSettings,
     fetchSettings: fetchSettings,
+    fetchOpsState: fetchOpsState,
+    pushOpsState: pushOpsState,
+    pushAudit: pushAudit,
+    fetchAuditLogs: fetchAuditLogs,
+    uploadDocument: uploadDocument,
     mapFromTable: mapFromTable,
     mapToTable: mapToTable
   };

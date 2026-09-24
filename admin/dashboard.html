@@ -403,6 +403,15 @@
       <section id="view-channels" class="view">
         <div class="view-head"><h3>Canaux & connexions</h3><button class="btn-add" data-new="channel"><i class="fas fa-plus"></i> Ajouter</button></div>
         <div class="table-wrap"><table class="dash-table"><thead><tr><th>Plateforme</th><th>Type</th><th>Identifiant</th><th>État</th><th>Sync</th><th>Dernier log</th><th>Actions</th></tr></thead><tbody id="chanBody"></tbody></table></div>
+        <div class="card" style="margin-top:16px;">
+          <h3><i class="fas fa-calendar-days" style="color:var(--gold);margin-right:8px;"></i>Synchroniser un calendrier iCal</h3>
+          <div class="field">
+            <label>URL d'export iCal (Google Agenda, Booking, Airbnb…)</label>
+            <input type="url" id="icalUrlInput" placeholder="https://…/basic.ics" autocomplete="off" spellcheck="false">
+          </div>
+          <button type="button" class="btn-add" id="icalSyncBtn"><i class="fas fa-rotate"></i> Importer les disponibilités</button>
+          <p class="muted" style="margin-top:10px;">Collez l'URL secrète d'export iCal, puis importez les blocages dans le calendrier. Si le navigateur bloque la lecture (CORS), un proxy Supabase (Edge Function) sera nécessaire — l'état reste alors honnête : « import impossible ».</p>
+        </div>
         <div class="card" style="margin-top:16px;"><h3>Journal de synchronisation</h3><div id="chanLogs"><p class="muted">Aucun journal.</p></div></div>
         <div class="card"><h3>Webhooks</h3><div class="table-wrap"><table class="dash-table"><thead><tr><th>Endpoint</th><th>Événement</th><th>État</th><th>Toggle</th><th>Action</th></tr></thead><tbody id="webhookBody"></tbody></table></div></div>
         <p class="muted" style="padding-top:8px;">Chaque connecteur est isolé : une panne n'arrête pas les autres. Aucune clé API / secret n'est affiché en clair.</p>

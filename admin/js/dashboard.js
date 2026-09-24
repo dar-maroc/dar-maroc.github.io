@@ -1304,8 +1304,9 @@
     channel: { title: 'Canal', fields: [
       { id: 'ePlatform', label: 'Plateforme', required: true },
       { id: 'eTypeC', label: 'Type', type: 'select', options: [{v:'OTA',l:'OTA'},{v:'Paiement',l:'Paiement'},{v:'IoT',l:'IoT'},{v:'Calendar',l:'Calendrier'},{v:'Pricing',l:'Tarification'},{v:'API',l:'API'},{v:'Webhook',l:'Webhook'},{v:'Messaging',l:'Messagerie'}] },
-      { id: 'eId', label: 'Identifiant public (jamais de secret)' }
-    ], save: function (v) { channels.push({ platform: v.ePlatform, type: v.eTypeC, id: v.eId, connected: false, sync: 'Non connecte', color: '#D4AF37', lastSync: '-', error: 'Configuration requise' }); logAudit('Canal', 'Ajout', '', v.ePlatform); persistOps(); } },
+      { id: 'eId', label: 'Identifiant public (jamais de secret)' },
+      { id: 'eIcalUrl', label: 'URL iCal (export, ex. Google/Booking)' }
+    ], save: function (v) { channels.push({ platform: v.ePlatform, type: v.eTypeC, id: v.eId, icalUrl: v.eIcalUrl || '', connected: false, sync: 'Non connecte', color: '#D4AF37', lastSync: '-', error: 'Configuration requise' }); logAudit('Canal', 'Ajout', '', v.ePlatform); persistOps(); } },
     'calendar-event': { title: 'Evenement calendrier', fields: [
       { id: 'eTitle', label: 'Titre', required: true },
       { id: 'eProperty', label: 'Logement' },
@@ -1341,7 +1342,8 @@
       eCurrent: existing && existing.current, eMin: existing && existing.min, eMax: existing && existing.max,
       eSeason: existing && existing.season, eHistory: existing && existing.history, eDemand: existing && existing.demand,
       eEvents: existing && existing.events, ePlatform: existing && existing.platform, eTypeC: existing && existing.type,
-      eId: existing && existing.id, eTitle: existing && existing.title, eEnd: existing && existing.end, eKind: existing && existing.kind
+      eId: existing && existing.id, eTitle: existing && existing.title, eEnd: existing && existing.end, eKind: existing && existing.kind,
+      eIcalUrl: existing && existing.icalUrl
     };
     var html = cfgE.fields.map(function (f) {
       var val = prevVals[f.id] != null ? prevVals[f.id] : '';
@@ -1383,7 +1385,7 @@
       case 'prestataire': return { name: v.eName, trade: v.eTrade, phone: v.ePhone, email: v.eEmail };
       case 'automation': return { trigger: v.eTrigger, action: v.eAction };
       case 'pricing': return Object.assign({}, prev, { property: v.eProperty, current: v.eCurrent, min: v.eMin, max: v.eMax, season: v.eSeason, history: v.eHistory, demand: v.eDemand, events: v.eEvents });
-      case 'channel': return Object.assign({}, prev, { platform: v.ePlatform, type: v.eTypeC, id: v.eId });
+      case 'channel': return Object.assign({}, prev, { platform: v.ePlatform, type: v.eTypeC, id: v.eId, icalUrl: v.eIcalUrl || '' });
       case 'calendar-event': return Object.assign({}, prev, { title: v.eTitle, property: v.eProperty, date: v.eDate, end: v.eEnd, kind: v.eKind });
       default: return prev;
     }
@@ -1391,36 +1393,67 @@
 
   /* Persist operational data (reservations, tasks, etc.) */
   var OPS_KEY = 'darmaroc-ops-data-v1';
+  var OPS_REMOTE_DEBOUNCE = 800;
+  var opsRemoteTimer = null;
+
+  function collectOpsPayload() {
+    return {
+      reservations: reservations, travelers: travelers, cleanings: cleanings,
+      maintenances: maintenances, accesses: accesses, documents: documents,
+      owners: owners, notifications: notifications, automations: automations,
+      providers: providers, pricing: pricing, channels: channels,
+      calendarEvents: calendarEvents
+    };
+  }
+
   function persistOps() {
     try {
-      localStorage.setItem(OPS_KEY, JSON.stringify({
-        reservations: reservations, travelers: travelers, cleanings: cleanings,
-        maintenances: maintenances, accesses: accesses, documents: documents,
-        owners: owners, notifications: notifications, automations: automations,
-        providers: providers, pricing: pricing, channels: channels,
-        calendarEvents: calendarEvents
-      }));
+      localStorage.setItem(OPS_KEY, JSON.stringify(collectOpsPayload()));
     } catch (e) {}
+    if (opsRemoteTimer) clearTimeout(opsRemoteTimer);
+    opsRemoteTimer = setTimeout(pushOpsRemote, OPS_REMOTE_DEBOUNCE);
   }
+
+  function pushOpsRemote() {
+    if (!window.DarMarocStore || !window.DarMarocStore.hasBackend()) return Promise.resolve(false);
+    return window.DarMarocStore.pushOpsState(collectOpsPayload());
+  }
+
+  function applyOpsPayload(o) {
+    if (!o) return;
+    if (o.reservations) reservations = o.reservations;
+    if (o.travelers) travelers = o.travelers;
+    if (o.cleanings) cleanings = o.cleanings;
+    if (o.maintenances) maintenances = o.maintenances;
+    if (o.accesses) accesses = o.accesses;
+    if (o.documents) documents = o.documents;
+    if (o.owners) owners = o.owners;
+    if (o.notifications) notifications = o.notifications;
+    if (o.automations && o.automations.length) automations = o.automations;
+    if (o.providers) providers = o.providers;
+    if (o.pricing) pricing = o.pricing;
+    if (o.channels && o.channels.length) channels = o.channels;
+    if (o.calendarEvents) calendarEvents = o.calendarEvents;
+  }
+
   function loadOps() {
     try {
       var raw = localStorage.getItem(OPS_KEY);
-      if (!raw) return;
-      var o = JSON.parse(raw);
-      if (o.reservations) reservations = o.reservations;
-      if (o.travelers) travelers = o.travelers;
-      if (o.cleanings) cleanings = o.cleanings;
-      if (o.maintenances) maintenances = o.maintenances;
-      if (o.accesses) accesses = o.accesses;
-      if (o.documents) documents = o.documents;
-      if (o.owners) owners = o.owners;
-      if (o.notifications) notifications = o.notifications;
-      if (o.automations) automations = o.automations;
-      if (o.providers) providers = o.providers;
-      if (o.pricing) pricing = o.pricing;
-      if (o.channels) channels = o.channels;
-      if (o.calendarEvents) calendarEvents = o.calendarEvents;
+      if (raw) applyOpsPayload(JSON.parse(raw));
     } catch (e) {}
+  }
+
+  function loadOpsFromCloud() {
+    if (!window.DarMarocStore || !window.DarMarocStore.hasBackend()) return Promise.resolve(null);
+    return window.DarMarocStore.fetchOpsState().then(function (remote) {
+      if (!remote) {
+        return pushOpsRemote().then(function () { return null; });
+      }
+      applyOpsPayload(remote);
+      try { localStorage.setItem(OPS_KEY, JSON.stringify(collectOpsPayload())); } catch (e) {}
+      renderAllExtended();
+      return remote;
+    });
   }
 
   document.querySelectorAll('[data-new]').forEach(function (btn) {
@@ -1564,8 +1597,27 @@
     input.addEventListener('change', function () {
       var file = input.files && input.files[0];
       if (!file || !documents[i]) return;
+      documents[i].name = file.name || documents[i].name;
+      documents[i].size = file.size < 1024 ? (file.size + ' o') : (Math.round(file.size / 1024) + ' Ko');
       if (file.size > 2 * 1024 * 1024) {
-        documents[i].size = (Math.round(file.size / 1024) + ' Ko');
+        if (window.DarMarocStore && window.DarMarocStore.hasBackend()) {
+          window.DarMarocStore.uploadDocument(documents[i].name, file)
+            .then(function (publicUrl) {
+              if (!publicUrl) throw new Error('URL vide');
+              documents[i].storageUrl = publicUrl;
+              documents[i].content = '';
+              logAudit('Document', 'Upload Storage', '', documents[i].name);
+              persistOps(); renderDocuments();
+              toast('Fichier stocké dans Supabase Storage.');
+            })
+            .catch(function (err) {
+              documents[i].content = '';
+              toast('Upload Storage échoué (' + (err && err.message || 'erreur') + ') — métadonnées enregistrées.', true);
+              logAudit('Document', 'Upload (métadonnées)', '', documents[i].name);
+              persistOps(); renderDocuments();
+            });
+          return;
+        }
         documents[i].content = '';
         toast('Fichier trop lourd pour le stockage local (' + documents[i].size + ') — métadonnées enregistrées, stockage Supabase requis pour le contenu.', true);
         logAudit('Document', 'Upload (métadonnées)', '', documents[i].name);
@@ -1575,8 +1627,7 @@
       var reader = new FileReader();
       reader.onload = function () {
         documents[i].content = reader.result;
-        documents[i].size = file.size < 1024 ? (file.size + ' o') : (Math.round(file.size / 1024) + ' Ko');
-        documents[i].name = file.name || documents[i].name;
+        documents[i].storageUrl = '';
         logAudit('Document', 'Upload', '', documents[i].name);
         persistOps(); renderDocuments(); toast('Fichier joint au document.');
       };
@@ -1588,6 +1639,18 @@
   function downloadDoc(i) {
     var d = documents[i];
     if (!d) return;
+    if (d.storageUrl) {
+      var a0 = document.createElement('a');
+      a0.href = d.storageUrl;
+      a0.target = '_blank';
+      a0.rel = 'noopener';
+      a0.download = d.name || 'document';
+      document.body.appendChild(a0);
+      a0.click();
+      document.body.removeChild(a0);
+      logAudit('Document', 'Téléchargement (Storage)', '', d.name);
+      return;
+    }
     if (!d.content) {
       toast('Fichier non stocké localement — joignez-le via l\'icône upload.', true);
       return;
@@ -1889,7 +1952,7 @@
   var calDate = new Date();
   var calProperty = '';
   var calendarEvents = [];
-  var CAL_KIND_LABEL = { reservation: 'Réservation', arrival: 'Arrivée', departure: 'Départ', block: 'Blocage', maintenance: 'Maintenance', cleaning: 'Ménage', access: 'Accès' };
+  var CAL_KIND_LABEL = { reservation: 'Réservation', arrival: 'Arrivée', departure: 'Départ', block: 'Blocage', maintenance: 'Maintenance', cleaning: 'Ménage', access: 'Accès', ical: 'iCal' };
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function isoOf(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
@@ -2309,7 +2372,7 @@
     { platform: 'Airbnb', type: 'OTA', id: '', connected: false, sync: 'Non connecté', color: '#FF5A5F', lastSync: '—', error: 'Configuration requise (API/partenaire)' },
     { platform: 'Booking.com', type: 'OTA', id: '', connected: false, sync: 'Non connecté', color: '#003580', lastSync: '—', error: 'Configuration requise (API/partenaire)' },
     { platform: 'Expedia', type: 'OTA', id: '', connected: false, sync: 'Non connecté', color: '#1B4D8F', lastSync: '—', error: 'Configuration requise (API/partenaire)' },
-    { platform: 'iCal', type: 'Calendar', id: '', connected: false, sync: 'Non connecté', color: '#E91E63', lastSync: '—', error: 'URL iCal à fournir' },
+    { platform: 'iCal', type: 'Calendar', id: '', icalUrl: '', connected: false, sync: 'Non connecté', color: '#E91E63', lastSync: '—', error: 'URL iCal à fournir' },
     { platform: 'PriceLabs', type: 'Pricing', id: '', connected: false, sync: 'Non connecté', color: '#7C3AED', lastSync: '—', error: 'Configuration requise (API)' },
     { platform: 'Stripe', type: 'Paiement', id: '', connected: false, sync: 'Non connecté', color: '#635BFF', lastSync: '—', error: 'Configuration requise (clés Stripe)' },
     { platform: 'Tuya Smart', type: 'IoT', id: '', connected: false, sync: 'Non connecté', color: '#009688', lastSync: '—', error: 'Connexion requise (appareils Tuya)' },
@@ -2332,7 +2395,7 @@
       var iconFa = c.type === 'Messaging' ? 'comment-dots' : c.type === 'OTA' ? 'plane' : c.type === 'Paiement' ? 'credit-card' : c.type === 'IoT' ? 'lightbulb' : c.type === 'API' ? 'code' : c.type === 'Webhook' ? 'link' : c.type === 'Pricing' ? 'tags' : 'calendar';
       return '<tr><td><i class="fas fa-' + iconFa + '" style="color:' + (c.color || 'var(--gold)') + ';margin-right:8px;"></i> ' + esc(c.platform) + '</td>' +
         '<td>' + esc(c.type) + '</td>' +
-        '<td>' + (c.id ? '<code style="font-size:0.8rem;">' + esc(c.id) + '</code>' : '<span class="muted">—</span>') + '</td>' +
+        '<td>' + (c.id ? '<code style="font-size:0.8rem;">' + esc(c.id) + '</code>' : (c.icalUrl ? '<code style="font-size:0.72rem;" title="' + esc(c.icalUrl) + '">' + esc(c.icalUrl.slice(0, 42)) + (c.icalUrl.length > 42 ? '…' : '') + '</code>' : '<span class="muted">—</span>')) + '</td>' +
         '<td class="' + connClass + '"><i class="fas ' + icon + '"></i> ' + connLabel + '</td>' +
         '<td>' + esc(c.sync) + '</td>' +
         '<td class="muted" style="font-size:0.78rem;">' + esc(c.error || c.lastSync || '—') + '</td>' +
@@ -2371,11 +2434,139 @@
       renderChannels();
     } else if ((t = e.target.closest('[data-chsync]'))) {
       var is = channels[+t.getAttribute('data-chsync')];
+      if (is.type === 'Calendar' || is.platform === 'iCal') {
+        syncIcalChannel(is);
+        return;
+      }
       if (!is.connected) { toast(is.platform + ' : synchronisation impossible (non connecté).', true); logChannel(is.platform, 'Sync refusée : non connecté.'); }
       else { is.lastSync = new Date().toLocaleString('fr-FR'); is.sync = 'Synchronisé'; toast('Synchronisation ' + is.platform + ' effectuée.'); logChannel(is.platform, 'Synchronisation OK.'); }
       renderChannels();
     }
   });
+
+  /* ---------- iCal : import réel des disponibilités ---------- */
+  function parseIcalDate(s) {
+    if (!s) return '';
+    var m = String(s).trim().match(/^(\d{4})(\d{2})(\d{2})/);
+    return m ? m[1] + '-' + m[2] + '-' + m[3] : '';
+  }
+
+  function unfoldIcalLines(text) {
+    return String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n[ \t]/g, '').split('\n');
+  }
+
+  function parseIcal(text) {
+    var lines = unfoldIcalLines(text);
+    var events = [];
+    var cur = null;
+    lines.forEach(function (line) {
+      if (line === 'BEGIN:VEVENT') { cur = {}; return; }
+      if (line === 'END:VEVENT') {
+        if (cur && (cur.dtstart || cur.dtend)) events.push(cur);
+        cur = null;
+        return;
+      }
+      if (!cur) return;
+      var idx = line.indexOf(':');
+      if (idx < 0) return;
+      var key = line.slice(0, idx).split(';')[0].toUpperCase();
+      var val = line.slice(idx + 1);
+      if (key === 'DTSTART') cur.dtstart = parseIcalDate(val);
+      else if (key === 'DTEND') cur.dtend = parseIcalDate(val);
+      else if (key === 'SUMMARY') cur.summary = val;
+      else if (key === 'UID') cur.uid = val;
+      else if (key === 'DESCRIPTION') cur.desc = val;
+    });
+    return events;
+  }
+
+  function icalEndExclusive(startIso, endIso) {
+    if (!endIso || endIso <= startIso) return endIso || startIso;
+    var d = parseIso(endIso);
+    if (!d) return endIso;
+    d.setDate(d.getDate() - 1);
+    return isoOf(d);
+  }
+
+  function syncIcalChannel(ch) {
+    if (!ch) return;
+    var url = String(ch.icalUrl || ch.id || '').trim();
+    if (!url || !/^https?:\/\//i.test(url)) {
+      toast('iCal : collez d\'abord une URL d\'export valide (Modifier le canal).', true);
+      logChannel('iCal', 'Sync refusée : URL iCal manquante.');
+      return;
+    }
+    ch.sync = 'Synchronisation…';
+    renderChannels();
+    logChannel('iCal', 'Récupération de l\'URL export…');
+    fetch(url, { method: 'GET', mode: 'cors', credentials: 'omit', redirect: 'follow' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function (text) {
+        var evs = parseIcal(text);
+        if (!evs.length) throw new Error('Aucun VEVENT dans le flux');
+        calendarEvents = calendarEvents.filter(function (e) { return e.source !== 'ical'; });
+        var added = 0;
+        evs.forEach(function (ev) {
+          var start = ev.dtstart;
+          if (!start) return;
+          var end = icalEndExclusive(start, ev.dtend || start);
+          calendarEvents.push({
+            id: uid(),
+            title: ev.summary || 'Blocage iCal',
+            property: '',
+            date: start,
+            end: end,
+            kind: 'ical',
+            source: 'ical',
+            uid: ev.uid || ''
+          });
+          added++;
+        });
+        ch.icalUrl = url;
+        ch.connected = true;
+        ch.sync = added + ' événement(s)';
+        ch.lastSync = new Date().toLocaleString('fr-FR');
+        ch.error = '';
+        logAudit('Canal', 'Sync iCal', '', added + ' événement(s)');
+        logChannel('iCal', added + ' événement(s) importé(s) dans le calendrier.');
+        persistOps();
+        renderChannels();
+        renderCalendar();
+        toast('iCal : ' + added + ' événement(s) importé(s).');
+      })
+      .catch(function (err) {
+        ch.connected = false;
+        ch.sync = 'Échec';
+        ch.lastSync = '—';
+        ch.error = 'Import impossible (CORS/réseau) — proxy iCal requis';
+        logChannel('iCal', 'Échec : ' + (err && err.message || 'CORS/réseau') + '. Navigateur bloqué — Edge Function/proxy nécessaire.');
+        renderChannels();
+        toast('iCal : import impossible depuis le navigateur (' + (err && err.message || 'CORS') + ').', true);
+      });
+  }
+
+  var icalUrlInput = document.getElementById('icalUrlInput');
+  var icalSyncBtn = document.getElementById('icalSyncBtn');
+  function prefillIcalInput() {
+    if (!icalUrlInput) return;
+    var existingIcal = channels.filter(function (c) { return c.icalUrl; })[0];
+    if (existingIcal && !icalUrlInput.value) icalUrlInput.value = existingIcal.icalUrl;
+  }
+  if (icalSyncBtn) {
+    icalSyncBtn.addEventListener('click', function () {
+      var ch = channels.filter(function (c) { return c.type === 'Calendar' || c.platform === 'iCal'; })[0];
+      if (!ch) {
+        ch = { platform: 'iCal', type: 'Calendar', id: '', icalUrl: '', connected: false, sync: 'Non connecté', color: '#E91E63', lastSync: '—', error: '' };
+        channels.push(ch);
+      }
+      if (icalUrlInput && icalUrlInput.value) ch.icalUrl = icalUrlInput.value.trim();
+      syncIcalChannel(ch);
+    });
+  }
+  prefillIcalInput();
 
   function testConnection(platform) {
     toast('Test connexion ' + platform + '...');
@@ -2451,8 +2642,8 @@
     var body = document.getElementById('docBody');
     if (!body) return;
     body.innerHTML = documents.map(function(d, i) {
-      var hasFile = !!(d.content && d.content.length);
-      return '<tr><td><div class="doc-item"><i class="fas fa-file-pdf doc-icon"></i><div class="doc-info"><div class="doc-name">' + esc(d.name) + '</div><div class="doc-meta">' + d.type + ' · ' + d.size + ' · ' + d.date + '</div></div></div></td>' +
+      var hasFile = !!(d.content && d.content.length) || !!d.storageUrl;
+      return '<tr><td><div class="doc-item"><i class="fas fa-file-pdf doc-icon"></i><div class="doc-info"><div class="doc-name">' + esc(d.name) + '</div><div class="doc-meta">' + d.type + ' · ' + d.size + ' · ' + d.date + (d.storageUrl ? ' · Storage' : '') + '</div></div></div></td>' +
         '<td>' + esc(d.property || '—') + '</td><td>' + esc(d.type || '—') + '</td><td>' + esc(d.size || '—') + '</td><td>' + esc(d.date || '—') + '</td>' +
         '<td>' + docExpirationBadge(d) + '</td><td>' + (d.reminder ? esc(d.reminder) + ' j avant' : '—') + '</td>' +
         '<td><div class="row-actions">' +
@@ -2692,7 +2883,7 @@
   var auditLog = [];
   try { auditLog = JSON.parse(localStorage.getItem('darmaroc-audit-log') || '[]'); } catch (e) { auditLog = []; }
   function logAudit(object, action, oldV, newV) {
-    auditLog.unshift({
+    var entry = {
       user: USERNAME || 'darmaroc',
       role: ROLE || 'admin',
       action: action || '',
@@ -2700,9 +2891,29 @@
       oldV: oldV || '',
       newV: newV || '',
       at: new Date().toISOString()
-    });
+    };
+    auditLog.unshift(entry);
     if (auditLog.length > 500) auditLog.pop();
     try { localStorage.setItem('darmaroc-audit-log', JSON.stringify(auditLog)); } catch (e) {}
+    if (window.DarMarocStore && window.DarMarocStore.hasBackend()) {
+      window.DarMarocStore.pushAudit(entry);
+    }
+  }
+  function loadAuditFromCloud() {
+    if (!window.DarMarocStore || !window.DarMarocStore.hasBackend()) return;
+    window.DarMarocStore.fetchAuditLogs(500).then(function (remote) {
+      if (!remote || !remote.length) return;
+      var seen = {};
+      auditLog.forEach(function (a) { seen[a.at + '|' + a.action + '|' + a.object] = 1; });
+      remote.forEach(function (a) {
+        var k = a.at + '|' + a.action + '|' + a.object;
+        if (!seen[k]) auditLog.push(a);
+      });
+      auditLog.sort(function (x, y) { return new Date(y.at) - new Date(x.at); });
+      if (auditLog.length > 500) auditLog.length = 500;
+      try { localStorage.setItem('darmaroc-audit-log', JSON.stringify(auditLog)); } catch (e) {}
+      renderAudit();
+    });
   }
   function renderAudit() {
     var body = document.getElementById('auditBody');
@@ -2848,7 +3059,12 @@
     renderWebhooks();
   }
 
-    /* ---------- Init ---------- */
+  /* ---------- Init ---------- */
   if (typeof loadOps === 'function') loadOps();
   renderAllExtended();
+  prefillIcalInput();
+  if (window.DarMarocStore && window.DarMarocStore.hasBackend()) {
+    loadOpsFromCloud().then(function () { prefillIcalInput(); }).catch(function () {});
+    loadAuditFromCloud();
+  }
 })();

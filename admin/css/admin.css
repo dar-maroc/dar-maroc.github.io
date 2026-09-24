@@ -656,6 +656,7 @@ body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--t
 .cal-event.kind-maintenance { background: rgba(224,82,82,0.18); border-left-color: var(--danger); }
 .cal-event.kind-block { background: rgba(155,155,155,0.2); border-left-color: var(--muted); }
 .cal-event.kind-access { background: rgba(0,150,136,0.18); border-left-color: #009688; }
+.cal-event.kind-ical { background: rgba(233,30,99,0.18); border-left-color: #E91E63; }
 .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .cal-week .cal-day { min-height: 120px; }
 .cal-day-list { display: flex; flex-direction: column; gap: 8px; }

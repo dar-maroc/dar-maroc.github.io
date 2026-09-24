@@ -25,6 +25,9 @@ avant** (100 % localStorage). Aucune page ne casse.
    `images`, `clients`, `demandes`, `admin_users`, etc.
    La fin du fichier crée aussi (optionnel) la table `stat_events` pour
    agréger les statistiques du site entre tous les appareils.
+4. **Phase A (ops)** : exécuter aussi `supabase/schema-ops.sql` → tables
+   `ops_state` (réservations, tâches, canaux…), `audit_logs`, bucket `documents`.
+   Sans ce fichier, le dashboard ops reste en localStorage uniquement.
 
 ### 3. Récupérer URL + clé anon
 1. **Project Settings** → **API** (ou **API Keys**).
