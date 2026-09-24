@@ -130,6 +130,7 @@
         <li><a href="index.html" class="active" data-fr="Accueil" data-ar="الرئيسية">Accueil</a></li>
         <li><a href="properties.html" data-fr="Propriétés" data-ar="العقارات">Propriétés</a></li>
         <li><a href="services.html" data-fr="Services" data-ar="الخدمات">Services</a></li>
+        <li><a href="gestion-conciergerie.html" data-fr="Gestion" data-ar="الإدارة">Gestion</a></li>
         <li><a href="deposer-annonce.html" data-fr="Déposer une annonce" data-ar="نشر إعلان">Déposer une annonce</a></li>
         <li><a href="about.html" data-fr="À propos" data-ar="من نحن">À propos</a></li>
         <li><a href="contact.html" data-fr="Contact" data-ar="اتصل بنا">Contact</a></li>
@@ -200,56 +201,8 @@
         <div class="gold-divider"></div>
         <p class="section-desc" data-fr="Découvrez notre sélection de biens immobiliers d'exception à travers le Maroc." data-ar="اكتشف مجموعتنا من العقارات الاستثنائية في جميع أنحاء المغرب.">Découvrez notre sélection de biens immobiliers d'exception à travers le Maroc.</p>
       </div>
-      <div class="properties-grid">
+      <div class="properties-grid" id="homePropertiesGrid">
         <noscript><p style="text-align:center;color:var(--text-light);padding:40px;">Activez JavaScript pour voir nos propriétés.</p></noscript>
-        <div class="property-card glow-card" data-aos="fade-up" data-aos-delay="0">
-          <div class="property-image">
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80" alt="Villa de luxe" loading="lazy">
-            <span class="property-badge" data-fr="À vendre" data-ar="للبيع">À vendre</span>
-          </div>
-          <div class="property-body">
-            <div class="property-price">2 500 000 DH</div>
-            <div class="property-city"><i class="fas fa-location-dot"></i> Marrakech</div>
-            <div class="property-details">
-              <span class="property-detail"><i class="fas fa-arrows-alt"></i> 250 m²</span>
-              <span class="property-detail"><i class="fas fa-bed"></i> 4</span>
-              <span class="property-detail"><i class="fas fa-bath"></i> 3</span>
-            </div>
-            <a href="properties.html" class="btn btn-outline btn-sm"><span data-fr="Voir" data-ar="عرض">Voir</span> <i class="fas fa-arrow-right"></i></a>
-          </div>
-        </div>
-        <div class="property-card glow-card" data-aos="fade-up" data-aos-delay="100">
-          <div class="property-image">
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" alt="Appartement de luxe" loading="lazy">
-            <span class="property-badge" data-fr="À louer" data-ar="للإيجار">À louer</span>
-          </div>
-          <div class="property-body">
-            <div class="property-price">8 000 DH / <span data-fr="mois" data-ar="شهر">mois</span></div>
-            <div class="property-city"><i class="fas fa-location-dot"></i> Casablanca</div>
-            <div class="property-details">
-              <span class="property-detail"><i class="fas fa-arrows-alt"></i> 120 m²</span>
-              <span class="property-detail"><i class="fas fa-bed"></i> 3</span>
-              <span class="property-detail"><i class="fas fa-bath"></i> 2</span>
-            </div>
-            <a href="properties.html" class="btn btn-outline btn-sm"><span data-fr="Voir" data-ar="عرض">Voir</span> <i class="fas fa-arrow-right"></i></a>
-          </div>
-        </div>
-        <div class="property-card glow-card" data-aos="fade-up" data-aos-delay="200">
-          <div class="property-image">
-            <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&q=80" alt="Riad traditionnel" loading="lazy">
-            <span class="property-badge" data-fr="À vendre" data-ar="للبيع">À vendre</span>
-          </div>
-          <div class="property-body">
-            <div class="property-price">4 200 000 DH</div>
-            <div class="property-city"><i class="fas fa-location-dot"></i> Fès</div>
-            <div class="property-details">
-              <span class="property-detail"><i class="fas fa-arrows-alt"></i> 320 m²</span>
-              <span class="property-detail"><i class="fas fa-bed"></i> 5</span>
-              <span class="property-detail"><i class="fas fa-bath"></i> 4</span>
-            </div>
-            <a href="properties.html" class="btn btn-outline btn-sm"><span data-fr="Voir" data-ar="عرض">Voir</span> <i class="fas fa-arrow-right"></i></a>
-          </div>
-        </div>
       </div>
       <div style="text-align:center;margin-top:40px;" data-aos="fade-up">
         <a href="properties.html" class="btn btn-primary"><span data-fr="Voir toutes les propriétés" data-ar="عرض جميع العقارات">Voir toutes les propriétés</span> <i class="fas fa-arrow-right"></i></a>
@@ -307,6 +260,17 @@
     </div>
   </section>
 
+  <section class="testimonials-section" data-aos="fade-up">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle" data-fr="Témoignages" data-ar="شهادات">Témoignages</span>
+        <h2 class="section-title" data-fr="Ils Nous Font Confiance" data-ar="يثقون بنا">Ils Nous Font Confiance</h2>
+        <div class="gold-divider"></div>
+      </div>
+      <div class="testimonials-grid" id="testimonialsGrid" data-limit="3"></div>
+    </div>
+  </section>
+
   <section class="gestion-conciergerie" id="gestion-conciergerie">
     <div class="moroccan-pattern"></div>
     <div class="container">
@@ -325,6 +289,7 @@
         <div class="why-card" data-aos="fade-up" data-aos-delay="500"><div class="why-icon"><i class="fas fa-robot"></i></div><h3 data-fr="Assistance intelligente par IA" data-ar="مساعدة ذكية بالذكاء الاصطناعي">Assistance intelligente par IA</h3><p data-fr="Alertes, recommandations et automatisations — les décisions sensibles restent humaines." data-ar="التنبيهات والتوصيات والأتمتة — القرارات الحساسة بشرية.">Alertes et recommandations — décisions sensibles humaines.</p></div>
       </div>
       <div class="gestion-cta" data-aos="fade-up">
+        <a href="gestion-conciergerie.html" class="btn btn-primary"><i class="fas fa-concierge-bell"></i> <span data-fr="En savoir plus" data-ar="اعرف المزيد">En savoir plus</span></a>
         <a href="contact.html?objet=confier#contactForm" class="btn btn-primary" id="btnConfierBien"><i class="fas fa-handshake"></i> <span data-fr="Confier mon bien à DarMaroc" data-ar="سِلّم عقارَك لدارالمغرب">Confier mon bien à DarMaroc</span></a>
         <a href="contact.html?objet=estimation#contactForm" class="btn btn-outline" id="btnEstimation"><i class="fas fa-calculator"></i> <span data-fr="Demander une estimation" data-ar="طلب تقييم">Demander une estimation</span></a>
       </div>
@@ -472,6 +437,20 @@
               <span class="error-msg" id="emailError"></span>
             </div>
             <div class="form-group">
+              <label for="formSubject" data-fr="Sujet" data-ar="الموضوع">Sujet</label>
+              <select id="formSubject">
+                <option value="" data-fr="Sélectionnez un sujet" data-ar="اختر موضوعا">Sélectionnez un sujet</option>
+                <option value="Gestion & Conciergerie" data-fr="Gestion & Conciergerie" data-ar="الإدارة والكونسيرج">Gestion &amp; Conciergerie</option>
+                <option value="Immobilier" data-fr="Immobilier" data-ar="عقارات">Immobilier</option>
+                <option value="Estimation" data-fr="Estimation" data-ar="تقدير">Estimation</option>
+                <option value="Rénovation" data-fr="Rénovation" data-ar="تجديد">Rénovation</option>
+                <option value="Décoration" data-fr="Décoration" data-ar="ديكور">Décoration</option>
+                <option value="Déménagement" data-fr="Déménagement" data-ar="نقل أثاث">Déménagement</option>
+                <option value="Nettoyage" data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</option>
+                <option value="Autre" data-fr="Autre" data-ar="أخرى">Autre</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label for="formMessage" data-fr="Message" data-ar="الرسالة">Message</label>
               <textarea id="formMessage" data-fr="Votre message..." data-ar="رسالتك..." placeholder="Votre message..." required></textarea>
               <span class="error-msg" id="messageError"></span>
@@ -526,11 +505,12 @@
         <div>
           <h4 data-fr="Services" data-ar="الخدمات">Services</h4>
           <div class="footer-links">
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Immobilier" data-ar="عقارات">Immobilier</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Rénovation" data-ar="تجديد">Rénovation</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Décoration" data-ar="ديكور">Décoration</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Déménagement" data-ar="نقل">Déménagement</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</span></a>
+            <a href="gestion-conciergerie.html"><i class="fas fa-chevron-right"></i> <span data-fr="Gestion & Conciergerie" data-ar="الإدارة والكونسيرج">Gestion &amp; Conciergerie</span></a>
+            <a href="services.html#immobilier"><i class="fas fa-chevron-right"></i> <span data-fr="Immobilier" data-ar="عقارات">Immobilier</span></a>
+            <a href="services.html#renovation"><i class="fas fa-chevron-right"></i> <span data-fr="Rénovation" data-ar="تجديد">Rénovation</span></a>
+            <a href="services.html#decoration"><i class="fas fa-chevron-right"></i> <span data-fr="Décoration" data-ar="ديكور">Décoration</span></a>
+            <a href="services.html#demenagement"><i class="fas fa-chevron-right"></i> <span data-fr="Déménagement" data-ar="نقل">Déménagement</span></a>
+            <a href="services.html#nettoyage"><i class="fas fa-chevron-right"></i> <span data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</span></a>
           </div>
         </div>
         <div>
@@ -625,6 +605,8 @@
   <script defer src="js/services.js"></script>
   <script defer src="js/showcase.js"></script>
   <script defer src="js/partners.js"></script>
+  <script defer src="js/home-properties.js"></script>
+  <script defer src="js/testimonials.js"></script>
   <script defer src="js/main.js"></script>
 </body>
 </html>

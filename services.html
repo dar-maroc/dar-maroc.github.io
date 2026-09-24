@@ -95,6 +95,7 @@
         <li><a href="index.html" data-fr="Accueil" data-ar="الرئيسية">Accueil</a></li>
         <li><a href="properties.html" data-fr="Propriétés" data-ar="العقارات">Propriétés</a></li>
         <li><a href="services.html" class="active" data-fr="Services" data-ar="الخدمات">Services</a></li>
+        <li><a href="gestion-conciergerie.html" data-fr="Gestion" data-ar="الإدارة">Gestion</a></li>
         <li><a href="deposer-annonce.html" data-fr="Déposer une annonce" data-ar="نشر إعلان">Déposer une annonce</a></li>
         <li><a href="about.html" data-fr="À propos" data-ar="من نحن">À propos</a></li>
         <li><a href="contact.html" data-fr="Contact" data-ar="اتصل بنا">Contact</a></li>
@@ -143,7 +144,7 @@
           <h3 data-fr="Property Rental" data-ar="تأجير العقارات">Property Rental</h3>
           <p data-fr="Location de propriétés résidentielles et commerciales." data-ar="تأجير العقارات السكنية والتجارية.">Location de propriétés résidentielles et commerciales.</p>
         </a>
-        <a href="contact.html?subject=Immobilier" class="service-card-large" data-aos="fade-up" data-aos-delay="100">
+        <a href="gestion-conciergerie.html" class="service-card-large" data-aos="fade-up" data-aos-delay="100">
           <img loading="lazy" alt="Gestion professionnelle de patrimoine immobilier" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?fm=webp&w=600&q=80" style="width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:20px;">
           <div class="service-icon"><i class="fas fa-handshake"></i></div>
           <h3 data-fr="Property Management" data-ar="إدارة العقارات">Property Management</h3>
@@ -213,7 +214,7 @@
     </div>
   </section>
 
-  <section class="service-detail" data-aos="fade-up">
+  <section id="immobilier" class="service-detail" data-aos="fade-up">
     <div class="container">
       <div class="service-detail-row">
         <div class="service-detail-image">
@@ -237,7 +238,7 @@
     </div>
   </section>
 
-  <section class="service-detail-alt" data-aos="fade-up">
+  <section id="renovation" class="service-detail-alt" data-aos="fade-up">
     <div class="container">
       <div class="service-detail-row">
         <div class="service-detail-image">
@@ -261,7 +262,7 @@
     </div>
   </section>
 
-  <section class="service-detail" data-aos="fade-up">
+  <section id="decoration" class="service-detail" data-aos="fade-up">
     <div class="container">
       <div class="service-detail-row">
         <div class="service-detail-image">
@@ -285,7 +286,7 @@
     </div>
   </section>
 
-  <section class="service-detail-alt" data-aos="fade-up">
+  <section id="demenagement" class="service-detail-alt" data-aos="fade-up">
     <div class="container">
       <div class="service-detail-row">
         <div class="service-detail-image">
@@ -309,7 +310,7 @@
     </div>
   </section>
 
-  <section class="service-detail" data-aos="fade-up">
+  <section id="nettoyage" class="service-detail" data-aos="fade-up">
     <div class="container">
       <div class="service-detail-row">
         <div class="service-detail-image">
@@ -340,7 +341,7 @@
         <h2 class="section-title" data-fr="Comment Nous Travaillons" data-ar="كيف نعمل">Comment Nous Travaillons</h2>
         <div class="gold-divider"></div>
       </div>
-      <div class="process-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;">
+      <div class="process-grid">
         <div class="process-step" data-aos="fade-up" data-aos-delay="0">
           <div class="process-step-number">1</div>
           <h4 data-fr="Consultation" data-ar="استشارة">Consultation</h4>
@@ -405,6 +406,7 @@
         <div class="gold-divider"></div>
       </div>
       <div class="testimonials-grid" id="testimonialsGrid"></div>
+    </div>
   </section>
 
   <section class="legal-section">
@@ -482,11 +484,12 @@
         <div>
           <h4 data-fr="Services" data-ar="الخدمات">Services</h4>
           <div class="footer-links">
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Immobilier" data-ar="عقارات">Immobilier</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Rénovation" data-ar="تجديد">Rénovation</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Décoration" data-ar="ديكور">Décoration</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Déménagement" data-ar="نقل">Déménagement</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</span></a>
+            <a href="gestion-conciergerie.html"><i class="fas fa-chevron-right"></i> <span data-fr="Gestion & Conciergerie" data-ar="الإدارة والكونسيرج">Gestion &amp; Conciergerie</span></a>
+            <a href="services.html#immobilier"><i class="fas fa-chevron-right"></i> <span data-fr="Immobilier" data-ar="عقارات">Immobilier</span></a>
+            <a href="services.html#renovation"><i class="fas fa-chevron-right"></i> <span data-fr="Rénovation" data-ar="تجديد">Rénovation</span></a>
+            <a href="services.html#decoration"><i class="fas fa-chevron-right"></i> <span data-fr="Décoration" data-ar="ديكور">Décoration</span></a>
+            <a href="services.html#demenagement"><i class="fas fa-chevron-right"></i> <span data-fr="Déménagement" data-ar="نقل">Déménagement</span></a>
+            <a href="services.html#nettoyage"><i class="fas fa-chevron-right"></i> <span data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</span></a>
           </div>
         </div>
         <div>

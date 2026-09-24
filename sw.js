@@ -1,6 +1,6 @@
 /* DarMaroc - Service Worker (PWA) v1.8.0 */
-const VERSION = 'darmaroc-v1.9.4';
-const CORE_CACHE = 'darmaroc-core-v24';
+const VERSION = 'darmaroc-v1.9.5';
+const CORE_CACHE = 'darmaroc-core-v25';
 const IMAGE_CACHE = 'darmaroc-images-v2';
 const API_CACHE = 'darmaroc-api-v1';
 
@@ -12,6 +12,7 @@ const CORE_ASSETS = [
   './deposer-annonce.html',
   './contact.html',
   './about.html',
+  './gestion-conciergerie.html',
   './faq.html',
   './mentions-legales.html',
   './politique-de-confidentialite.html',
@@ -27,6 +28,7 @@ const CORE_ASSETS = [
   './js/main.js',
   './js/services.js',
   './js/testimonials.js',
+  './js/home-properties.js',
   './js/showcase.js',
   './js/partners.js',
   './js/properties.js',

@@ -95,6 +95,7 @@
         <li><a href="index.html" data-fr="Accueil" data-ar="الرئيسية">Accueil</a></li>
         <li><a href="properties.html" data-fr="Propriétés" data-ar="العقارات">Propriétés</a></li>
         <li><a href="services.html" data-fr="Services" data-ar="الخدمات">Services</a></li>
+        <li><a href="gestion-conciergerie.html" data-fr="Gestion" data-ar="الإدارة">Gestion</a></li>
         <li><a href="deposer-annonce.html" data-fr="Déposer une annonce" data-ar="نشر إعلان">Déposer une annonce</a></li>
         <li><a href="about.html" data-fr="À propos" data-ar="من نحن">À propos</a></li>
         <li><a href="contact.html" class="active" data-fr="Contact" data-ar="اتصل بنا">Contact</a></li>
@@ -217,10 +218,13 @@
               <label for="formSubject" data-fr="Sujet" data-ar="الموضوع">Sujet</label>
               <select id="formSubject">
                 <option value="" data-fr="Sélectionnez un sujet" data-ar="اختر موضوعا">Sélectionnez un sujet</option>
+                <option value="Gestion & Conciergerie" data-fr="Gestion & Conciergerie" data-ar="الإدارة والكونسيرج">Gestion &amp; Conciergerie</option>
                 <option value="Immobilier" data-fr="Immobilier" data-ar="عقارات">Immobilier</option>
+                <option value="Estimation" data-fr="Estimation" data-ar="تقدير">Estimation</option>
                 <option value="Rénovation" data-fr="Rénovation" data-ar="تجديد">Rénovation</option>
                 <option value="Décoration" data-fr="Décoration" data-ar="ديكور">Décoration</option>
                 <option value="Déménagement" data-fr="Déménagement" data-ar="نقل أثاث">Déménagement</option>
+                <option value="Nettoyage" data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</option>
                 <option value="Autre" data-fr="Autre" data-ar="أخرى">Autre</option>
               </select>
             </div>
@@ -279,11 +283,12 @@
         <div>
           <h4 data-fr="Services" data-ar="الخدمات">Services</h4>
           <div class="footer-links">
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Immobilier" data-ar="عقارات">Immobilier</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Rénovation" data-ar="تجديد">Rénovation</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Décoration" data-ar="ديكور">Décoration</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Déménagement" data-ar="نقل">Déménagement</span></a>
-            <a href="services.html"><i class="fas fa-chevron-right"></i> <span data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</span></a>
+            <a href="gestion-conciergerie.html"><i class="fas fa-chevron-right"></i> <span data-fr="Gestion & Conciergerie" data-ar="الإدارة والكونسيرج">Gestion &amp; Conciergerie</span></a>
+            <a href="services.html#immobilier"><i class="fas fa-chevron-right"></i> <span data-fr="Immobilier" data-ar="عقارات">Immobilier</span></a>
+            <a href="services.html#renovation"><i class="fas fa-chevron-right"></i> <span data-fr="Rénovation" data-ar="تجديد">Rénovation</span></a>
+            <a href="services.html#decoration"><i class="fas fa-chevron-right"></i> <span data-fr="Décoration" data-ar="ديكور">Décoration</span></a>
+            <a href="services.html#demenagement"><i class="fas fa-chevron-right"></i> <span data-fr="Déménagement" data-ar="نقل">Déménagement</span></a>
+            <a href="services.html#nettoyage"><i class="fas fa-chevron-right"></i> <span data-fr="Nettoyage" data-ar="تنظيف">Nettoyage</span></a>
           </div>
         </div>
         <div>
@@ -380,11 +385,16 @@
     var params = new URLSearchParams(window.location.search);
     var objet = params.get("objet");
     if (!objet) return;
+    var subjectSelect = document.getElementById("formSubject");
+    if (subjectSelect) {
+      if (objet === "confier") subjectSelect.value = "Gestion & Conciergerie";
+      else if (objet === "estimation") subjectSelect.value = "Estimation";
+    }
     var msg = document.getElementById("formMessage");
     if (!msg) return;
-    if (objet === "confier") {
+    if (objet === "confier" && !msg.value) {
       msg.value = "Bonjour DarMaroc, je souhaite confier mon bien à votre service de gestion et conciergerie.\n\nType de bien :\nVille :\nNombre de logements :\nDisponibilité :";
-    } else if (objet === "estimation") {
+    } else if (objet === "estimation" && !msg.value) {
       msg.value = "Bonjour DarMaroc, je souhaite demander une estimation pour mon bien.\n\nType de bien :\nVille :\nSurface :\nDescription :";
     }
     msg.focus();

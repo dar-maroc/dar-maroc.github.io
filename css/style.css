@@ -2222,9 +2222,9 @@ html[data-theme="light"] .map-wrapper iframe {
   .btn { width: 100%; justify-content: center; }
   .section-title { font-size: 1.75rem; }
   .contact-form { padding: 24px; }
-  .footer-grid, .footer-top { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .footer-grid, .footer-top { grid-template-columns: 1fr; gap: 24px; }
   .footer-grid > .footer-brand, .footer-top > .footer-brand { grid-column: 1 / -1; }
-  .footer-links a { font-size: 0.8rem; gap: 4px; }
+  .footer-links a { font-size: 0.85rem; gap: 6px; }
   .footer h4 { font-size: 1rem; margin-bottom: 16px; }
   .footer-grid { padding-bottom: 40px; }
 }

@@ -55,6 +55,20 @@
       .replace(/'/g, '&#39;');
   }
 
+  function slugify(s) {
+    if (window.DarMarocSEO && window.DarMarocSEO.slugify) {
+      try { return window.DarMarocSEO.slugify(s); } catch (e) {}
+    }
+    return String(s == null ? '' : s).toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  }
+
+  function propSlug(p) {
+    if (!p) return '';
+    return slugify(p.id || p.fr || p.ar || '');
+  }
+
   function fmtDate(iso) {
     if (!iso) return '';
     var d = new Date(String(iso));
@@ -119,6 +133,7 @@
       if (items && items.length) {
         properties = sortNewest(items);
         renderCards();
+        tryOpenFromLocation();
       }
     });
   }
@@ -275,6 +290,7 @@
   function openProperty(idx) {
     var p = properties[idx];
     if (!p) return;
+    setLocationSlug(propSlug(p));
     if (window.DarMarocSEO && window.DarMarocSEO.update) {
       try { window.DarMarocSEO.update(p); } catch (e) {}
     }
@@ -372,6 +388,50 @@
     if (lightboxMain) lightboxMain.hidden = false;
     if (lightboxThumbs) lightboxThumbs.hidden = false;
     document.body.style.overflow = '';
+    clearLocationSlug();
+  }
+
+  function getLocationSlug() {
+    try {
+      var q = new URLSearchParams(location.search).get('bien');
+      if (q) return String(q).toLowerCase();
+      if (location.hash && location.hash.length > 1) {
+        return decodeURIComponent(location.hash.slice(1)).toLowerCase();
+      }
+    } catch (e) {}
+    return '';
+  }
+
+  function findIndexBySlug(slug) {
+    if (!slug) return -1;
+    for (var i = 0; i < properties.length; i++) {
+      if (propSlug(properties[i]) === slug) return i;
+      if (properties[i] && String(properties[i].id || '').toLowerCase() === slug) return i;
+    }
+    return -1;
+  }
+
+  function setLocationSlug(slug) {
+    try {
+      if (!slug) return;
+      var url = location.pathname + location.search + '#' + encodeURIComponent(slug);
+      history.replaceState(null, '', url);
+    } catch (e) {}
+  }
+
+  function clearLocationSlug() {
+    try {
+      if (location.hash || (location.search && new URLSearchParams(location.search).get('bien'))) {
+        history.replaceState(null, '', location.pathname + location.search.replace(/[?&]bien=[^&]*/, '').replace(/^&/, '?').replace(/\?$/, ''));
+      }
+    } catch (e) {}
+  }
+
+  function tryOpenFromLocation() {
+    var slug = getLocationSlug();
+    if (!slug) return;
+    var idx = findIndexBySlug(slug);
+    if (idx >= 0) openProperty(idx);
   }
 
   grid.addEventListener('click', function (e) {
@@ -409,4 +469,6 @@
       });
     }
   }
+  /* Deep-link : ouvre le bien depuis #slug ou ?bien=slug */
+  tryOpenFromLocation();
 })();

@@ -67,7 +67,10 @@
 
   function render(list) {
     var lang = getLang();
-    var testimonials = (list || getData()).slice(0, 6);
+    var limitAttr = grid.getAttribute('data-limit');
+    var limit = limitAttr ? Number(limitAttr) : (grid.id === 'testimonialsGrid' && document.body && document.querySelector('section.gestion-conciergerie') ? 3 : 6);
+    if (!limit || isNaN(limit) || limit < 1) limit = 6;
+    var testimonials = (list || getData()).slice(0, limit);
     grid.innerHTML = testimonials.map(function (t, i) { return cardHTML(t, lang, i); }).join('');
 
     if (window.AOS) {

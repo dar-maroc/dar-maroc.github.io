@@ -38,7 +38,7 @@ window.DARMAROC_DATA = (function () {
         id: 'gestion', cat: 'immobilier', fr: 'Gestion locative', ar: 'إدارة العقارات',
         icon: 'fa-handshake', desc: 'Gestion professionnelle de votre patrimoine immobilier.',
         descAr: 'إدارة احترافية لممتلكاتك العقارية.',
-        href: 'services.html',
+        href: 'gestion-conciergerie.html',
         img: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?fm=webp&w=600&q=80',
         alt: 'Consultation gestion immobilière', delay: 100
       },
