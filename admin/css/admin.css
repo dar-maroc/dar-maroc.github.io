@@ -437,7 +437,10 @@ body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--t
     transition: left .3s;
     z-index: 50;
     box-shadow: 20px 0 60px rgba(0,0,0,0.5);
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
+  .sidebar .sidebar-nav { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
   .sidebar.open { left: 0; }
   .menu-toggle { display: block; }
   .dash-content { padding: 20px 16px; }

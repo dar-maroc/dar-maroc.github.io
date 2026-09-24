@@ -1176,10 +1176,13 @@
     var view = link.getAttribute('data-view');
     if (view) switchView(view);
     document.getElementById('sidebar').classList.remove('open');
+    document.body.style.overflow = '';
   });
 
   document.getElementById('menuToggle').addEventListener('click', function () {
-    document.getElementById('sidebar').classList.toggle('open');
+    var sb = document.getElementById('sidebar');
+    sb.classList.toggle('open');
+    document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
   });
 
   document.addEventListener('pointerdown', function (e) {
@@ -1188,8 +1191,24 @@
     if (window.innerWidth <= 768 && sidebar.classList.contains('open') &&
         !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
       sidebar.classList.remove('open');
+      document.body.style.overflow = '';
     }
   });
+
+  // Empêche le scroll du body derrière le sidebar ouvert (mobile)
+  var sidebarEl = document.getElementById('sidebar');
+  if (sidebarEl) {
+    sidebarEl.addEventListener('touchmove', function (e) {
+      if (window.innerWidth <= 768 && sidebarEl.classList.contains('open')) {
+        e.stopPropagation();
+      }
+    }, { passive: true });
+    sidebarEl.addEventListener('wheel', function (e) {
+      if (window.innerWidth <= 768 && sidebarEl.classList.contains('open')) {
+        e.stopPropagation();
+      }
+    }, { passive: true });
+  }
 
   var statsRefreshBtn = document.getElementById('statsRefresh');
   if (statsRefreshBtn) {
@@ -1866,14 +1885,14 @@
         }
         result.innerHTML = '<div class="ai-indicator pending"><i class="fas fa-spinner fa-spin"></i> Génération en cours...</div>';
         var type = document.getElementById('aiGenType').value;
-        if (window.DarMarocAI && window.DarMarocAI.generate) {
+        if (window.DarMarocAI && typeof window.DarMarocAI.generate === 'function') {
           window.DarMarocAI.generate(type).then(function (text) {
             result.innerHTML = '<textarea rows="6" style="width:100%;box-sizing:border-box;background:var(--bg-soft);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:12px;">' + esc(text || '') + '</textarea>';
           }).catch(function () {
             result.innerHTML = '<div class="ai-indicator offline"><i class="fas fa-circle-xmark"></i> Erreur IA — vérifiez la clé et le quota.</div>';
           });
         } else {
-          result.innerHTML = '<div class="ai-indicator offline"><i class="fas fa-circle-xmark"></i> Module DarMarocAI absent.</div>';
+          result.innerHTML = '<div class="ai-indicator offline"><i class="fas fa-circle-xmark"></i> Module DarMarocAI absent — rechargez la page.</div>';
         }
       });
     }

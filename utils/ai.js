@@ -225,11 +225,39 @@
 
   function getProperties() { return loadProperties(); }
 
+  /* ---------- Génération de contenu (dashboard AI Manager) ---------- */
+  function generate(type) {
+    var prompts = {
+      description: 'Rédige une description immobilière attractive en français pour un bien DarMaroc à Agadir : style, lumineux, proche commodités, appel à l\'action. 80 mots max.',
+      social: 'Crée un post réseaux sociaux FR pour DarMaroc (immobilier Agadir) : emoji, 3 hashtags, lien WhatsApp. Court et percutant.',
+      email: 'Rédige un email professionnel de bienvenue à un voyageur DarMaroc : arrivée, check-in, contacts utiles. 100 mots max.'
+    };
+    var hint = prompts[type] || prompts.description;
+    if (!KEY) {
+      return Promise.resolve('[Mode local — clé Gemini non configurée]\n\n' + hint + '\n\nConfigurez ai.gemini.apiKey dans config/site-config.js pour générer le contenu réel.');
+    }
+    return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent?key=' + encodeURIComponent(KEY), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: hint }] }],
+        generationConfig: { temperature: 0.8, maxOutputTokens: 500 }
+      })
+    }).then(function (res) {
+      if (!res.ok) throw new Error('API');
+      return res.json();
+    }).then(function (json) {
+      if (!json || !json.candidates || !json.candidates.length) throw new Error('empty');
+      return json.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('');
+    });
+  }
+
   window.DarMarocAI = {
-    VERSION: 'v1.0',
+    VERSION: 'v1.1',
     ask: ask,
     search: searchProperties,
     getProperties: getProperties,
-    refresh: refreshProperties
+    refresh: refreshProperties,
+    generate: generate
   };
 })();
