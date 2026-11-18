@@ -3,7 +3,7 @@
    utils/ai-orchestrator.js
    
    Rôle :
-   - Coordination des neuf agents IA
+   - Coordination des dix agents IA
    - File de tâches avec statuts (queued → running → awaiting_approval → approved/rejected → executed/failed)
    - Historique des missions et journaux d'activité
    - Partage contrôlé du contexte (moindre privilège par agent)
@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  /* ---------- Configuration des neuf agents ---------- */
+  /* ---------- Configuration des dix agents ---------- */
   var AGENTS = {
     '1': { id: '1', name: 'DAR MAROC MANAGER AI', role: 'manager', permissions: ['read_all', 'coordinate', 'approve_request', 'report'] },
     '2': { id: '2', name: 'MARKET RESEARCH AI', role: 'researcher', permissions: ['read_public', 'research_niche', 'analyze_competition'] },
@@ -29,7 +29,8 @@
     '6': { id: '6', name: 'SOCIAL MEDIA MANAGER AI', role: 'publisher', permissions: ['prepare_calendar', 'adapt_platform', 'prepare_response'] },
     '7': { id: '7', name: 'SEO AND TRAFFIC AI', role: 'seo', permissions: ['analyze_seo', 'identify_keywords', 'prepare_utm'] },
     '8': { id: '8', name: 'BUSINESS DEVELOPMENT AI', role: 'developer', permissions: ['research_partners', 'prepare_proposal', 'classify_opportunity'] },
-    '9': { id: '9', name: 'PERFORMANCE ANALYST AI', role: 'performanceAnalyst', permissions: ['analyze_results', 'compare_content', 'track_clicks'] }
+    '9': { id: '9', name: 'PERFORMANCE ANALYST AI', role: 'performanceAnalyst', permissions: ['analyze_results', 'compare_content', 'track_clicks'] },
+    '10': { id: '10', name: 'REAL ESTATE LISTINGS AI', role: 'realEstateListings', permissions: ['read_public', 'search_properties', 'verify_listing', 'detect_duplicates', 'prepare_listing', 'classify_opportunity'] }
   };
 
   /* ---------- Statuts de mission ---------- */

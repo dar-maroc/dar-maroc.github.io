@@ -12,6 +12,7 @@
    
    CONTRAINTE : Aucun message ne doit être envoyé ni aucune entreprise contactée
    sans autorisation explicite de l’humain.
+   Toutes les données retournées sont basées sur des entrées réelles fournies.
    ============================================================ */
 (function () {
   'use strict';
@@ -41,7 +42,7 @@
             agent: Agent.name,
             agentId: Agent.id,
             type: 'business_development',
-            missionId: payload.missionId,
+            missionId: mission.id,
             content: 'Action non reconnue : ' + action,
             requiresApproval: false,
             externalAction: false
@@ -53,6 +54,7 @@
     researchPartners: function (payload) {
       var sector = payload.sector || 'immobilier';
       var region = payload.region || 'Maroc';
+      var partnerData = payload.partnerData || null; // Données réelles fournies
 
       return Promise.resolve({
         agent: Agent.name,
@@ -63,7 +65,7 @@
         data: {
           sector: sector,
           region: region,
-          potentialPartners: [],
+          potentialPartners: partnerData && partnerData.partners ? partnerData.partners : [],
           partnerTypes: [
             'Agences immobilières locales',
             'Promoteurs et constructeurs',
@@ -72,12 +74,12 @@
             'Plateformes de voyage et tourisme',
             'Associations de la diaspora'
           ],
-          sources: [],
+          sources: partnerData && partnerData.sources || [],
           note: 'Toute recherche doit s’appuyer sur des sources publiques uniquement. Aucun contact direct.'
         },
         requiresApproval: true,
         externalAction: false,
-        confidence: 40,
+        confidence: partnerData ? 70 : 40,
         estimatedCost: 0
       });
     },
@@ -86,6 +88,7 @@
     prepareProposal: function (payload) {
       var partnerName = payload.partnerName || 'Partenaire potentiel';
       var collaborationType = payload.collaborationType || 'partenariat';
+      var proposalData = payload.proposalData || null; // Données réelles
 
       return Promise.resolve({
         agent: Agent.name,
@@ -97,23 +100,30 @@
           partnerName: partnerName,
           collaborationType: collaborationType,
           draftSubject: 'Proposition de partenariat — DarMaroc',
-          draftBody: '',
-          valueProposition: [],
-          terms: [],
+          draftBody: this.draftProposalBody(partnerName, collaborationType, proposalData),
+          valueProposition: proposalData && proposalData.valueProposition ? proposalData.valueProposition : [],
+          terms: proposalData && proposalData.terms ? proposalData.terms : [],
           nextSteps: ['Réviser le contenu', 'Valider avec l’humain', 'Obtenir l’autorisation d’envoi'],
           warning: 'Aucun envoi sans autorisation explicite.'
         },
         requiresApproval: true,
         externalAction: false,
-        confidence: 70,
+        confidence: proposalData ? 75 : 50,
         estimatedCost: 0
       });
+    },
+
+    /* ---------- Corps de proposition ---------- */
+    draftProposalBody: function (partnerName, type, data) {
+      var valueProp = data && data.valueProposition ? data.valueProposition.join('\n- ') : 'Valeur à définir';
+      return 'Bonjour ' + partnerName + ',\n\nJe me permets de vous contacter au sujet d’une éventuelle collaboration entre DarMaroc et votre entreprise.\n\nValeur proposée :\n- ' + valueProp + '\n\nSeriez-vous ouvert à un échange sur les possibilités de partenariat ?\n\nCordialement,\nL’équipe DarMaroc';
     },
 
     /* ---------- Préparation de message de partenariat ---------- */
     preparePartnershipMessage: function (payload) {
       var partnerName = payload.partnerName || 'Partenaire';
       var language = payload.language || 'fr';
+      var messageData = payload.messageData || null;
 
       var messages = {
         fr: 'Bonjour,\n\nJe me permets de vous contacter au sujet d’une éventuelle collaboration entre DarMaroc et votre entreprise.\n\nSeriez-vous ouvert à un échange sur les possibilités de partenariat ?\n\nCordialement,\nL’équipe DarMaroc',
@@ -154,14 +164,14 @@
         content: 'Opportunité classée par pertinence.',
         data: {
           opportunity: opportunity,
-          relevanceScore: 0,
+          relevanceScore: opportunity.relevanceScore || 0,
           criteria: ['pertinence sectorielle', 'localisation', 'potentiel commercial', 'facilité de contact'],
-          recommendation: 'À évaluer avec des données réelles avant toute approche.',
-          status: 'non_contacté'
+          recommendation: opportunity.recommendation || 'À évaluer avec des données réelles avant toute approche.',
+          status: opportunity.status || 'non_contacté'
         },
         requiresApproval: false,
         externalAction: false,
-        confidence: 50,
+        confidence: opportunity.relevanceScore ? 70 : 40,
         estimatedCost: 0
       });
     }

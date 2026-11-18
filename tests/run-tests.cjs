@@ -17,17 +17,20 @@ console.log('');
 
 let totalPassed = 0;
 let totalFailed = 0;
+let totalTests = 0;
 
 (async () => {
   for (const file of files) {
     const filePath = path.join(testDir, file);
     console.log('--- ' + file + ' ---');
+
     // Chaque fichier de test gère son propre comptage via console
     // On l'exécute dans un contexte isolé
     try {
       require(filePath);
     } catch (e) {
       console.log('  ERREUR lors de l\'execution de ' + file + ':', e.message);
+      totalFailed++;
     }
     console.log('');
   }

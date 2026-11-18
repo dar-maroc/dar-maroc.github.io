@@ -11,7 +11,9 @@
    - Gérer les connexions officielles aux plateformes (quand disponibles et autorisées)
    
    Plateformes : WhatsApp Business, Facebook, Instagram, TikTok, YouTube, Threads.
-   Aucune publication ou communication externe sans approbation humaine.
+   
+   CONTRAINTE : Aucune publication ou communication externe sans approbation humaine.
+   Toutes les données retournées sont basées sur des entrées réelles fournies.
    ============================================================ */
 (function () {
   'use strict';
@@ -41,7 +43,7 @@
             agent: Agent.name,
             agentId: Agent.id,
             type: 'social_media',
-            missionId: payload.missionId,
+            missionId: mission.id,
             content: 'Action non reconnue : ' + action,
             requiresApproval: false,
             externalAction: false
@@ -54,17 +56,43 @@
       var startDate = payload.startDate || new Date().toISOString().slice(0, 10);
       var days = payload.days || 7;
       var platforms = payload.platforms || ['instagram', 'facebook', 'whatsapp'];
+      var contentThemes = payload.contentThemes || []; // Thèmes de contenu réels fournis
 
+      return Promise.resolve({
+        agent: Agent.name,
+        agentId: Agent.id,
+        type: 'editorial_calendar',
+        missionId: payload.missionId,
+        content: 'Calendrier éditorial préparé : ' + (days * platforms.length) + ' publication(s) sur ' + days + ' jour(s) pour ' + platforms.length + ' plateforme(s).',
+        data: {
+          calendar: this.buildCalendar(startDate, days, platforms, contentThemes),
+          platforms: platforms,
+          startDate: startDate,
+          totalPosts: days * platforms.length,
+          note: 'Aucune publication externe programmée — chaque publication nécessite une approbation humaine.'
+        },
+        requiresApproval: true,
+        externalAction: false,
+        confidence: contentThemes.length > 0 ? 80 : 40,
+        risks: ['Aucune publication externe programmée — chaque publication nécessite une approbation humaine'],
+        estimatedCost: 0
+      });
+    },
+
+    /* ---------- Construire le calendrier ---------- */
+    buildCalendar: function (startDate, days, platforms, contentThemes) {
       var calendar = [];
       var current = new Date(startDate);
+
       for (var i = 0; i < days; i++) {
         var dateStr = current.toISOString().slice(0, 10);
         platforms.forEach(function (platform) {
+          var themeIndex = i % contentThemes.length;
           calendar.push({
             date: dateStr,
             platform: platform,
             contentType: i % 2 === 0 ? 'post' : 'story',
-            topic: 'Immobilier Agadir — à définir par l’agent 5',
+            topic: contentThemes[themeIndex] || 'Sujet à définir',
             status: 'draft',
             approved: false,
             scheduledTime: null,
@@ -74,31 +102,28 @@
         current.setDate(current.getDate() + 1);
       }
 
-      return Promise.resolve({
-        agent: Agent.name,
-        agentId: Agent.id,
-        type: 'editorial_calendar',
-        missionId: payload.missionId || null,
-        content: 'Calendrier éditorial préparé : ' + calendar.length + ' publication(s) sur ' + days + ' jour(s) pour ' + platforms.length + ' plateforme(s).',
-        data: { calendar: calendar, platforms: platforms, startDate: startDate },
-        requiresApproval: true,
-        externalAction: false,
-        confidence: 100,
-        risks: ['Aucune publication externe programmée — chaque publication nécessite une approbation humaine'],
-        estimatedCost: 0
-      });
+      return calendar;
     },
 
     /* ---------- Adaptation de contenu par plateforme ---------- */
     adaptContent: function (payload) {
       var content = payload.content || '';
       var platform = payload.platform || 'generic';
+      var maxLengths = {
+        whatsapp: 4096,
+        facebook: 63206,
+        instagram: 2200,
+        tiktok: 2200,
+        youtube: 5000,
+        threads: 500
+      };
 
       var adapted = {
         platform: platform,
         originalContent: content,
         adaptedContent: this.adaptForPlatform(content, platform),
         characterCount: content.length,
+        maxLength: maxLengths[platform] || 500,
         hashtags: payload.hashtags || [],
         waLink: payload.waLink || null,
         note: 'Adaptation préparée uniquement — publication manuelle ou via API officielle après approbation.'
@@ -138,6 +163,7 @@
     prepareResponse: function (payload) {
       var message = payload.message || '';
       var language = payload.language || 'fr';
+      var incomingMessage = payload.incomingMessage || '';
 
       var responses = {
         fr: 'Bonjour ! Merci pour votre intérêt pour DarMaroc. Nous vous répondons dans les plus brefs délais.',
