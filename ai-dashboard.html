@@ -117,6 +117,16 @@
       </div>
     </div>
 
+    <!-- Test rapide des agents -->
+    <div class="ai-section">
+      <div class="ai-section-title"><i class="fa-solid fa-robot"></i> Test rapide des agents</div>
+      <p style="font-size:0.85rem;color:#6c757d;margin-bottom:12px;">Créez une mission de test pour chaque agent. Chaque mission sera soumise à validation humaine avant exécution externe.</div>
+      <div class="ai-grid" id="ai-agent-test-grid">
+        <!-- Rempli par JS -->
+      </div>
+      <div id="ai-agent-test-result" style="margin-top:12px;"></div>
+    </div>
+
     <!-- Journaux d'activité récents -->
     <div class="ai-section">
       <div class="ai-section-title"><i class="fa-solid fa-list-ul"></i> Journaux d'activité récents</div>
@@ -266,6 +276,49 @@
         } else {
           logsEl.innerHTML = '<div class="ai-empty">Aucun journal d’activité pour le moment.</div>';
         }
+
+        // Test rapide des agents
+        var agentTestEl = document.getElementById('ai-agent-test-grid');
+        if (agentTestEl && orch) {
+          var agents = orch.getAllAgents();
+          var agentTestHtml = '';
+          Object.keys(agents).forEach(function (aid) {
+            var a = agents[aid];
+            agentTestHtml += '' +
+              '<div class="ai-stat-card">' +
+              '<div class="ai-stat-label">' + escapeHtml(a.name) + '</div>' +
+              '<div style="font-size:0.75rem;color:#6c757d;margin-bottom:8px;">' + escapeHtml(a.role) + '</div>' +
+              '<button class="btn btn-primary btn-sm" onclick="testAgent(\'' + aid + '\')">Tester cet agent</button>' +
+              '</div>';
+          });
+          agentTestEl.innerHTML = agentTestHtml;
+        }
+
+        window.testAgent = function (agentId) {
+          var orch = window.DarMarocAIOrchestrator;
+          var agent = orch.getAgentInfo(agentId);
+          if (!agent) {
+            alert('Agent introuvable : ' + agentId);
+            return;
+          }
+          var missionTitle = 'Test ' + agent.name;
+          var missionPayload = {};
+          switch (agentId) {
+            case '1': missionPayload = { action: 'coordinate', targetAgents: ['2','3','4'] }; break;
+            case '2': missionPayload = { scope: 'maroc', focus: 'immobilier' }; break;
+            case '3': missionPayload = { platforms: ['instagram', 'tiktok'] }; break;
+            case '4': missionPayload = { segment: 'diaspora' }; break;
+            case '5': missionPayload = { contentType: 'social_post', language: 'fr', topic: 'Villa Agadir' }; break;
+            case '6': missionPayload = { action: 'calendar', platforms: ['facebook', 'instagram'] }; break;
+            case '7': missionPayload = { action: 'audit' }; break;
+            case '8': missionPayload = { action: 'research', sector: 'immobilier' }; break;
+            case '9': missionPayload = { action: 'analyze', statsSource: 'localStorage' }; break;
+            case '10': missionPayload = { action: 'search', scope: 'maroc', focus: 'immobilier' }; break;
+          }
+          var mission = orch.createMission({ title: missionTitle, agentId: agentId, priority: 3, payload: missionPayload });
+          alert('Mission créée pour ' + agent.name + ' (ID: ' + mission.id.substring(0, 8) + '...). Statut : ' + mission.status + '. Consultez la file de tâches.');
+          render();
+        };
       }
 
       function decideValidation(validationId, decision, decidedBy) {
