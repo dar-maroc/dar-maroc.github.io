@@ -77,10 +77,10 @@ Fichiers modifiés à téléverser pour la v1.6 :
 
 ## Comptes du dashboard
 
-| Identifiant | Rôle | Mot de passe par défaut |
+| Identifiant | Rôle | Source des identifiants |
 | --- | --- | --- |
-| `darmaroc` | Super admin | `Netuser03$` |
-| `user1` … `user5` | Contributeurs | `DarMaroc2026!` |
+| `darmaroc` | Super admin | Base Supabase `admin_users` (hash stocké) |
+| `user1` … `user5` | Contributeurs | Base Supabase `admin_users` (hash stocké) |
 
 Contributeur = ajout de photos et annonces + gestion de ses propres annonces.
 Admin = accès complet. Les comptes sont partagés entre tous les appareils

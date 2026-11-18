@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAR MAROC AI — Centre de Validation</title>
+  <meta name="description" content="Centre de validation humaine pour l'équipe marketing multi-agents IA de DAR MAROC.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .ai-container { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: inherit; }
+    .ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #0F0F0F; }
+    .ai-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-approved { background: #d4edda; color: #155724; }
+    .badge-rejected { background: #f8d7da; color: #721c24; }
+    .badge-executed { background: #d1ecf1; color: #0c5460; }
+    .badge-queued { background: #e2e3e5; color: #383d41; }
+    .badge-running { background: #ffe5d0; color: #8a5a00; }
+    .badge-failed { background: #f5c6cb; color: #721c24; }
+    .ai-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: #fff; }
+    .ai-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .ai-card-title { font-weight: 600; font-size: 1.1rem; margin: 0; }
+    .ai-card-meta { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .ai-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+    .btn-primary { background: #0F0F0F; color: #fff; }
+    .btn-primary:hover { background: #333; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-success:hover { background: #218838; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-danger:hover { background: #c82333; }
+    .btn-outline { background: transparent; color: #0F0F0F; border: 1px solid #0F0F0F; }
+    .btn-outline:hover { background: #f8f9fa; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .ai-section { margin-bottom: 30px; }
+    .ai-section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .ai-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .ai-table th, .ai-table td { padding: 10px; border: 1px solid #dee2e6; text-align: left; font-size: 0.9rem; }
+    .ai-table th { background: #f8f9fa; font-weight: 600; }
+    .ai-table tr:nth-child(even) { background: #fafafa; }
+    .ai-content-preview { max-height: 200px; overflow: auto; background: #f8f9fa; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; border: 1px solid #e9ecef; white-space: pre-wrap; }
+    .ai-empty { text-align: center; padding: 40px; color: #6c757d; }
+    .ai-warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 12px; border-radius: 4px; margin-bottom: 16px; }
+    .ai-info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 12px; border-radius: 4px; margin-bottom: 16px; }
+    .ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+    .ai-stat-card { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 16px; }
+    .ai-stat-value { font-size: 2rem; font-weight: 700; color: #0F0F0F; }
+    .ai-stat-label { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .nav-link { color: #0F0F0F; text-decoration: none; padding: 8px 16px; border: 1px solid #dee2e6; border-radius: 4px; display: inline-block; margin: 4px; }
+    .nav-link:hover { background: #f8f9fa; }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin: 2px; }
+    .tag-agent { background: #e9ecef; color: #495057; }
+    .tag-platform { background: #d1ecf1; color: #0c5460; }
+    .tag-lang { background: #d4edda; color: #155724; }
+  </style>
+</head>
+<body>
+  <!-- Navigation et en-tête réutilisant le design existant -->
+  <header style="background:#0F0F0F;color:#fff;padding:1rem 0;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <i class="fa-solid fa-robot" style="color:#ffd700;"></i>
+        <strong style="font-size:1.3rem;">DAR MAROC AI</strong>
+      </div>
+      <nav>
+        <a href="index.html" class="nav-link" style="color:#fff;border-color:#444;">← Retour au site</a>
+        <a href="admin/dashboard.html" class="nav-link" style="color:#fff;border-color:#444;">Espace Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="ai-container">
+    <div class="ai-header">
+      <div>
+        <h1 style="margin:0;font-size:1.5rem;"><i class="fa-solid fa-shield-halved" style="color:#dc3545;margin-right:8px;"></i>Centre de Validation Humaine</h1>
+        <p style="margin:4px 0 0;color:#666;">Toute action proposée par les agents IA doit être approuvée ici avant exécution externe.</p>
+      </div>
+      <div class="ai-badge badge-pending" id="badge-count">0 en attente</div>
+    </div>
+
+    <!-- Avertissement obligatoire -->
+    <div class="ai-warning">
+      <strong>⚠️ Mode approbation humaine obligatoire :</strong> Aucun agent ne peut publier, envoyer des messages WhatsApp, contacter des prospects ou partenaires, modifier le site, déployer du code ou engager une dépense sans votre approbation explicite sur cette page.
+    </div>
+
+    <!-- Statistiques rapides -->
+    <div class="ai-section">
+      <div class="ai-section-title"><i class="fa-solid fa-chart-pie"></i> État général</div>
+      <div class="ai-grid" id="ai-stats-grid">
+        <!-- Rempli par JS -->
+      </div>
+    </div>
+
+    <!-- Validations en attente -->
+    <div class="ai-section">
+      <div class="ai-section-title"><i class="fa-solid fa-clock"></i> Validations en attente</div>
+      <div id="ai-pending-list">
+        <!-- Rempli par JS -->
+      </div>
+    </div>
+
+    <!-- File de tâches -->
+    <div class="ai-section">
+      <div class="ai-section-title"><i class="fa-solid fa-tasks"></i> File de tâches (orchestrateur)</div>
+      <div id="ai-queue-list">
+        <!-- Rempli par JS -->
+      </div>
+    </div>
+
+    <!-- État des fournisseurs IA -->
+    <div class="ai-section">
+      <div class="ai-section-title"><i class="fa-solid fa-server"></i> Fournisseurs IA et quotas</div>
+      <div id="ai-provider-list">
+        <!-- Rempli par JS -->
+      </div>
+    </div>
+
+    <!-- Journaux d'activité récents -->
+    <div class="ai-section">
+      <div class="ai-section-title"><i class="fa-solid fa-list-ul"></i> Journaux d'activité récents</div>
+      <div id="ai-logs-list">
+        <!-- Rempli par JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Chargement des modules DAR MAROC AI -->
+  <script src="utils/ai.js"></script>
+  <script src="utils/ai-provider.js"></script>
+  <script src="utils/ai-orchestrator.js"></script>
+  <script src="ai/agents/agent-1-manager.js"></script>
+  <script src="ai/agents/agent-2-market-research.js"></script>
+  <script src="ai/agents/agent-3-trend-intelligence.js"></script>
+  <script src="ai/agents/agent-4-audience-intelligence.js"></script>
+  <script src="ai/agents/agent-5-content-creator.js"></script>
+  <script src="ai/agents/agent-6-social-media-manager.js"></script>
+  <script src="ai/agents/agent-7-seo-traffic.js"></script>
+  <script src="ai/agents/agent-8-business-development.js"></script>
+  <script src="ai/agents/agent-9-performance-analyst.js"></script>
+  <script src="utils/ai-init.js"></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var statusEl = document.getElementById('ai-stats-grid');
+      var pendingEl = document.getElementById('ai-pending-list');
+      var queueEl = document.getElementById('ai-queue-list');
+      var providerEl = document.getElementById('ai-provider-list');
+      var logsEl = document.getElementById('ai-logs-list');
+      var badgeEl = document.getElementById('badge-count');
+
+      function render() {
+        if (!window.DarMarocAI || !window.DarMarocAI.system || !window.DarMarocAI.system.initialized) {
+          // Attendre l'initialisation
+          setTimeout(render, 200);
+          return;
+        }
+
+        var status = window.DarMarocAI.system.getStatus();
+
+        // Badge
+        var pendingCount = status.validations ? status.validations.length : 0;
+        badgeEl.textContent = pendingCount + ' en attente';
+        badgeEl.className = 'ai-badge ' + (pendingCount > 0 ? 'badge-pending' : 'badge-approved');
+
+        // Statistiques
+        var agents = status.agents || {};
+        var agentCount = Object.keys(agents).length;
+        var queueCount = status.queue ? status.queue.length : 0;
+
+        statusEl.innerHTML = '' +
+          '<div class="ai-stat-card"><div class="ai-stat-value">' + agentCount + '</div><div class="ai-stat-label">Agents IA</div></div>' +
+          '<div class="ai-stat-card"><div class="ai-stat-value">' + queueCount + '</div><div class="ai-stat-label">Tâches en file</div></div>' +
+          '<div class="ai-stat-card"><div class="ai-stat-value">' + pendingCount + '</div><div class="ai-stat-label">Validations en attente</div></div>' +
+          '<div class="ai-stat-card"><div class="ai-stat-value">' + (status.initialized ? 'OK' : 'OFF') + '</div><div class="ai-stat-label">Système IA</div></div>';
+
+        // Validations en attente
+        if (status.validations && status.validations.length > 0) {
+          var html = '<table class="ai-table"><thead><tr><th>Action proposée</th><th>Agent</th><th>Plateforme</th><th>Coût estimé</th><th>Risques</th><th>Décision</th></tr></thead><tbody>';
+          status.validations.forEach(function (v) {
+            html += '' +
+              '<tr>' +
+              '<td><strong>' + escapeHtml(v.actionProposed || '') + '</strong><br>' +
+              '<div class="ai-content-preview">' + escapeHtml(v.content || '(aucun contenu)') + '</div>' +
+              '</td>' +
+              '<td><span class="tag tag-agent">' + escapeHtml(v.agentId || '') + '</span></td>' +
+              '<td><span class="tag tag-platform">' + (v.platform || '—') + '</span></td>' +
+              '<td>' + (v.estimatedCost || 0) + ' €</td>' +
+              '<td>' + escapeHtml(v.risks || '—') + '</td>' +
+              '<td>' +
+              '<button class="btn btn-success btn-sm" onclick="decideValidation(\'' + v.id + '\', \'approved\', prompt(\'Votre identifiant (ex: admin)\'))">Approuver</button> ' +
+              '<button class="btn btn-danger btn-sm" onclick="decideValidation(\'' + v.id + '\', \'rejected\', prompt(\'Votre identifiant (ex: admin)\'))">Refuser</button>' +
+              '</td>' +
+              '</tr>';
+          });
+          html += '</tbody></table>';
+          pendingEl.innerHTML = html;
+        } else {
+          pendingEl.innerHTML = '<div class="ai-empty">Aucune validation en attente. Les agents n’ont préparé aucune action pour le moment.</div>';
+        }
+
+        // File de tâches
+        if (status.queue && status.queue.length > 0) {
+          var qhtml = '<table class="ai-table"><thead><tr><th>Mission</th><th>Agent</th><th>Statut</th><th>Priorité</th><th>Tentatives</th></tr></thead><tbody>';
+          status.queue.forEach(function (m) {
+            qhtml += '' +
+              '<tr>' +
+              '<td>' + escapeHtml(m.title || '') + '</td>' +
+              '<td>' + escapeHtml(m.agentId || '') + '</td>' +
+              '<td><span class="badge-' + (m.status || 'queued') + '">' + (m.status || 'queued') + '</span></td>' +
+              '<td>' + (m.priority || 5) + '</td>' +
+              '<td>' + (m.attempts || 0) + ' / ' + (m.maxAttempts || 3) + '</td>' +
+              '</tr>';
+          });
+          qhtml += '</tbody></table>';
+          queueEl.innerHTML = qhtml;
+        } else {
+          queueEl.innerHTML = '<div class="ai-empty">File de tâches vide.</div>';
+        }
+
+        // Fournisseurs IA
+        var provHtml = '<div class="ai-empty">Aucun fournisseur IA configuré (mode local uniquement).</div>';
+        if (status.providers) {
+          var provs = status.providers;
+          var hasAny = false;
+          provHtml = '<table class="ai-table"><thead><tr><th>Fournisseur</th><th>Modèle</th><th>État</th><th>Quota utilisé</th><th>Dernière erreur</th></tr></thead><tbody>';
+          Object.keys(provs).forEach(function (key) {
+            var p = provs[key];
+            if (!p) return;
+            hasAny = true;
+            var stateClass = p.available ? 'badge-approved' : 'badge-failed';
+            provHtml += '' +
+              '<tr>' +
+              '<td>' + escapeHtml(key) + '</td>' +
+              '<td>' + escapeHtml(p.model || '—') + '</td>' +
+              '<td><span class="ai-badge ' + stateClass + '">' + (p.available ? 'Disponible' : 'Indisponible') + '</span></td>' +
+              '<td>' + (p.used !== null ? p.used : '—') + (p.limit !== null ? ' / ' + p.limit : '') + '</td>' +
+              '<td>' + (p.lastError || '—') + '</td>' +
+              '</tr>';
+          });
+          provHtml += '</tbody></table>';
+          if (!hasAny) provHtml = '<div class="ai-empty">Aucun fournisseur IA configuré.</div>';
+        }
+        providerEl.innerHTML = provHtml;
+
+        // Journaux récents
+        var orch = window.DarMarocAIOrchestrator;
+        var recentLogs = orch ? orch.getAgentLogs(null, 10) : [];
+        if (recentLogs && recentLogs.length > 0) {
+          var lhtml = '<table class="ai-table"><thead><tr><th>Heure</th><th>Agent</th><th>Niveau</th><th>Message</th></tr></thead><tbody>';
+          recentLogs.forEach(function (l) {
+            var time = (l.created_at || '').slice(11, 16);
+            lhtml += '' +
+              '<tr>' +
+              '<td>' + escapeHtml(time) + '</td>' +
+              '<td>' + escapeHtml(l.agent_id || '') + '</td>' +
+              '<td><span class="badge-' + (l.level || 'info') + '">' + (l.level || 'info') + '</span></td>' +
+              '<td>' + escapeHtml(l.action || '') + '</td>' +
+              '</tr>';
+          });
+          lhtml += '</tbody></table>';
+          logsEl.innerHTML = lhtml;
+        } else {
+          logsEl.innerHTML = '<div class="ai-empty">Aucun journal d’activité pour le moment.</div>';
+        }
+      }
+
+      function decideValidation(validationId, decision, decidedBy) {
+        if (!decidedBy) {
+          alert('Veuillez entrer votre identifiant.');
+          return;
+        }
+        var note = prompt('Note de décision (optionnel) :');
+        try {
+          var result = window.DarMarocAIOrchestrator.decideValidation(validationId, decision, decidedBy, note);
+          alert('Décision enregistrée : ' + decision + ' pour la validation ' + validationId);
+          render();
+        } catch (e) {
+          alert('Erreur : ' + e.message);
+        }
+      }
+
+      window.decideValidation = decideValidation;
+
+      function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Démarrer
+      render();
+      setInterval(render, 5000); // Rafraîchissement toutes les 5 secondes
+    })();
+  </script>
+</body>
+</html>

@@ -713,7 +713,7 @@ create policy "admin_users_select" on public.admin_users for select using (true)
 create policy "admin_users_write" on public.admin_users for all using (true) with check (true);
 
 -- Comptes par défaut : darmaroc (admin) + 5 contributeurs.
--- Hash SHA-256 : admin = "Netuser03$", contributeurs = "DarMaroc2026!".
+-- Hash SHA-256 stockés dans la base. À changer après première connexion.
 insert into public.admin_users (username, role, pass_hash) values
   ('darmaroc', 'admin', '81be8c04b5efcf7ef00cb012d43fb833b010d0730499003ffa9ad2d8fb2dcaf8'),
   ('user1', 'contrib', '2e6c12a1c7b82705e65b4c885ed2994d2632ed43196c08dce769dada01e3243e'),

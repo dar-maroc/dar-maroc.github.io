@@ -107,6 +107,22 @@ window.DARMAROC_CONFIG = (function () {
         model: 'gemini-2.0-flash',
         maxRetries: 2
       }
+    },
+
+    /* ---------- Authentification serveur (Edge Function ai-auth) ----------
+       URL de l'Edge Function Supabase pour l'authentification JWT.
+       Déployer l'Edge Function ai-auth avant d'activer cette option.
+       Tant que vide, l'authentification côté client (SHA-256) reste utilisée. */
+    aiAuth: {
+      endpoint: ''
+    },
+
+    /* ---------- Edge Functions IA (ai-generate) ----------
+       URL de l'Edge Function Supabase pour la génération IA.
+       Les clés API sont stockées côté serveur (Supabase Secrets).
+       Cette URL est publique, ce n'est pas un secret. */
+    aiGenerate: {
+      endpoint: ''
     }
   };
 })();

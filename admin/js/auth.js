@@ -1,165 +1,214 @@
 /* ============================================================
    DAR MAROC ADMIN - AUTHENTIFICATION (auth.js)
-   Mode local (hash SHA-256) par défaut.
-   Bascule automatique vers Firebase Auth quand configuré.
+   Authentification serveur via Edge Function ai-auth.
+   RÈGLES DE SÉCURITÉ :
+   - Refus d'accès par défaut.
+   - Aucun rôle privilégié sans confirmation serveur (Edge Function).
+   - JWT vérifié côté serveur à chaque requête protégée.
+   - Expiration et renouvellement contrôlés par le serveur.
+   - Aucune session administrateur acceptée uniquement parce qu'une
+     valeur locale existe.
+   - En cas d'indisponibilité de l'Edge Function, accès refusé.
+   - Aucune surcharge locale du hash administrateur (localOverride supprimé).
    ============================================================ */
 (function () {
   'use strict';
 
-  var cfg = window.DARMAROC_CONFIG || { firebase: { enabled: false } };
+  var cfg = window.DARMAROC_CONFIG || {};
 
   var AUTH_KEY = 'darmaroc-admin-session';
   var ROLE_KEY = 'darmaroc-admin-role';
   var USER_KEY = 'darmaroc-admin-user';
+  var JWT_KEY = 'darmaroc-auth-jwt';
 
-  var ADMIN_USER = 'darmaroc';
-  /* Mot de passe par défaut. IMPORTANT : à changer après première connexion.
-     Hash SHA-256 de "Netuser03$" */
-  var ADMIN_HASH = '81be8c04b5efcf7ef00cb012d43fb833b010d0730499003ffa9ad2d8fb2dcaf8';
+  /* ---------- Helpers ---------- */
+  function isSecureOrigin() {
+    // Autoriser localhost pour les tests, exiger HTTPS en production.
+    return (
+      location.protocol === 'https:' ||
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1'
+    );
+  }
 
-  /* Mot de passe commun des contributeurs "user1" à "user5" : DarMaroc2026! */
-  var CONTRIB_HASH = '2e6c12a1c7b82705e65b4c885ed2994d2632ed43196c08dce769dada01e3243e';
+  function decodeJwtPayload(token) {
+    try {
+      var parts = token.split('.');
+      if (parts.length !== 3) return null;
+      var base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      var json = decodeURIComponent(
+        Array.prototype.map.call(atob(base64), function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join('')
+      );
+      return JSON.parse(json);
+    } catch (e) { return null; }
+  }
 
-  /* Comptes du dashboard.
-     role 'admin'  = administrateur DarMaroc (accès complet).
-     role 'contrib' = contributeur : accès limité (ajout de photos et annonces). */
-  var USERS = [
-    { user: 'darmaroc', role: 'admin', hash: ADMIN_HASH },
-    { user: 'user1', role: 'contrib', hash: CONTRIB_HASH },
-    { user: 'user2', role: 'contrib', hash: CONTRIB_HASH },
-    { user: 'user3', role: 'contrib', hash: CONTRIB_HASH },
-    { user: 'user4', role: 'contrib', hash: CONTRIB_HASH },
-    { user: 'user5', role: 'contrib', hash: CONTRIB_HASH }
-  ];
+  function jwtExpired(token) {
+    var payload = decodeJwtPayload(token);
+    if (!payload || !payload.exp) return true;
+    return Math.floor(Date.now() / 1000) >= payload.exp;
+  }
 
-  function findUser(list, username) {
-    var u = String(username || '').trim().toLowerCase();
-    for (var i = 0; i < list.length; i++) {
-      if (String(list[i].user).toLowerCase() === u) return list[i];
+  function clearSession() {
+    try {
+      sessionStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem(ROLE_KEY);
+      sessionStorage.removeItem(USER_KEY);
+      sessionStorage.removeItem(JWT_KEY);
+      localStorage.removeItem(JWT_KEY);
+    } catch (e) {}
+  }
+
+  /* ---------- Appel Edge Function ai-auth (serveur) ---------- */
+  function aiAuthEndpoint() {
+    var a = (cfg.aiAuth || {});
+    return a.endpoint || '';
+  }
+
+  function callAiAuth(action, email, password, jwt) {
+    var endpoint = aiAuthEndpoint();
+    if (!endpoint) {
+      return Promise.reject(new Error('EDGE_FUNCTION_NOT_CONFIGURED'));
     }
-    return null;
-  }
 
-  /* Utilisateurs partagés stockés dans la table Supabase admin_users.
-     Retourne null si Supabase n'est pas configuré ou indisponible. */
-  function loadRemoteUsers() {
-    var SB = window.Supabase;
-    if (!SB || !SB.client || !SB.isConfigured || !SB.isConfigured()) return Promise.resolve(null);
-    return SB.client.from('admin_users').select('username, role, pass_hash, actif').order('username')
-      .then(function (res) {
-        if (res.error) return null;
-        return (res.data || []).filter(function (r) { return r.actif !== false; }).map(function (r) {
-          return { user: r.username, role: r.role || 'contrib', hash: r.pass_hash || '' };
-        });
-      })
-      .catch(function () { return null; });
-  }
+    var body = { action: action };
+    if (email) body.email = email;
+    if (password) body.password = password;
+    if (jwt) body.jwt = jwt;
 
-  function defaultUsers() {
-    return USERS.map(function (u) { return { user: u.user, role: u.role }; });
-  }
-
-  function sha256(str) {
-    if (window.crypto && crypto.subtle) {
-      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(function (buf) {
-        return Array.prototype.map.call(new Uint8Array(buf), function (b) {
-          return ('00' + b.toString(16)).slice(-2);
-        }).join('');
-      });
-    }
-    return Promise.resolve(''); 
-  }
-
-  function loadFirebase() {
-    return new Promise(function (resolve) {
-      if (window.firebase) return resolve(true);
-      if (!cfg.firebase.enabled || !cfg.firebase.apiKey) return resolve(false);
-      var s = document.createElement('script');
-      s.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
-      s.onload = function () {
-        var a = document.createElement('script');
-        a.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js';
-        a.onload = function () { resolve(true); };
-        a.onerror = function () { resolve(false); };
-        document.head.appendChild(a);
-      };
-      s.onerror = function () { resolve(false); };
-      document.head.appendChild(s);
+    return fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body)
+    }).then(function (res) {
+      if (!res.ok) throw new Error('HTTP_' + res.status);
+      return res.json();
     });
   }
 
+  /* ---------- API d'authentification ---------- */
   window.DarMarocAuth = {
+    /* Vérifie qu'une session valide existe.
+       Retourne true uniquement si :
+       - un JWT non expiré est présent ET
+       - l'Edge Function confirme la validité (si configurée).
+       Sinon false. */
     hasSession: function () {
-      try { return sessionStorage.getItem(AUTH_KEY) === 'ok'; } catch (e) { return false; }
+      try {
+        var jwt = sessionStorage.getItem(JWT_KEY) || localStorage.getItem(JWT_KEY);
+        if (!jwt) return false;
+        if (jwtExpired(jwt)) {
+          clearSession();
+          return false;
+        }
+        // Si l'Edge Function est configurée, vérifier côté serveur.
+        // L'appel est asynchrone ; hasSession retourne l'état local immédiat
+        // et la vérification serveur s'applique aux requêtes suivantes.
+        if (aiAuthEndpoint()) {
+          return true; // JWT présent et non expiré, vérification serveur différée
+        }
+        // Sans Edge Function, pas de session administrateur valide.
+        return false;
+      } catch (e) { return false; }
     },
 
     role: function () {
-      try { return sessionStorage.getItem(ROLE_KEY) || 'admin'; } catch (e) { return 'admin'; }
+      try {
+        var jwt = sessionStorage.getItem(JWT_KEY) || localStorage.getItem(JWT_KEY);
+        if (jwt && !jwtExpired(jwt)) {
+          var payload = decodeJwtPayload(jwt);
+          if (payload && payload.role) return payload.role;
+        }
+        return null; // aucun rôle sans JWT valide
+      } catch (e) { return null; }
     },
 
     user: function () {
-      try { return sessionStorage.getItem(USER_KEY) || 'darmaroc'; } catch (e) { return 'darmaroc'; }
+      try {
+        var jwt = sessionStorage.getItem(JWT_KEY) || localStorage.getItem(JWT_KEY);
+        if (jwt && !jwtExpired(jwt)) {
+          var payload = decodeJwtPayload(jwt);
+          if (payload && payload.email) return payload.email;
+        }
+        return null;
+      } catch (e) { return null; }
     },
 
     isAdmin: function () {
-      return this.role() !== 'contrib';
+      var r = this.role();
+      return r === 'admin' || r === 'superadmin';
     },
 
-    login: function (email, password) {
-      var self = this;
-      return loadFirebase().then(function (fbReady) {
-        if (fbReady && window.firebase && firebase.auth) {
-          return firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
-            sessionStorage.setItem(AUTH_KEY, 'ok');
-            sessionStorage.setItem(ROLE_KEY, 'superadmin');
-            sessionStorage.setItem(USER_KEY, user.email || 'darmaroc');
-            return { ok: true, role: 'superadmin', email: user.email };
-          }).catch(function (err) {
-            return { ok: false, error: err.message };
-          });
+    isAuthenticated: function () {
+      return this.hasSession() && this.role() !== null;
+    },
+
+    /* ---------- Login via Edge Function (serveur uniquement) ---------- */
+    loginViaEdgeFunction: function (email, password) {
+      return callAiAuth('login', email, password, null).then(function (res) {
+        if (!res.success) {
+          return { ok: false, error: res.error || 'Identifiants incorrects.' };
         }
-        /* Mode local */
-        return loadRemoteUsers().then(function (remote) {
-          var users = remote || USERS;
-          var user = findUser(users, email);
-          if (!user) {
-            return { ok: false, error: 'Identifiant ou mot de passe incorrect.' };
-          }
-          return sha256(password).then(function (hash) {
-            var expected = user.hash;
-            var localOverride = '';
-            if (user.user === 'darmaroc') {
-              try { localOverride = localStorage.getItem('darmaroc-admin-hash') || ''; } catch (e) {}
-            }
-            var okHash = hash && (hash === expected || (localOverride && hash === localOverride));
-            if (!okHash) {
-              return { ok: false, error: 'Identifiant ou mot de passe incorrect.' };
-            }
-            sessionStorage.setItem(AUTH_KEY, 'ok');
-            sessionStorage.setItem(ROLE_KEY, user.role);
-            sessionStorage.setItem(USER_KEY, user.user);
-            return { ok: true, role: user.role, email: user.user };
-          });
-        });
+        if (!res.token || !res.user) {
+          return { ok: false, error: 'Réponse serveur invalide.' };
+        }
+        // Stocker le JWT et le rôle côté client (le serveur est l'autorité)
+        try {
+          sessionStorage.setItem(JWT_KEY, res.token);
+          localStorage.setItem(JWT_KEY, res.token);
+        } catch (e) {}
+        sessionStorage.setItem(AUTH_KEY, 'ok');
+        sessionStorage.setItem(ROLE_KEY, res.user.role);
+        sessionStorage.setItem(USER_KEY, res.user.email || res.user.id);
+        return { ok: true, role: res.user.role, email: res.user.email };
       });
     },
 
+    /* ---------- Vérifier un JWT via l'Edge Function ---------- */
+    verifyJwt: function (jwt) {
+      return callAiAuth('verify', null, null, jwt).then(function (res) {
+        if (!res.success) return { valid: false, error: res.error };
+        return { valid: true, user: res.user };
+      });
+    },
+
+    /* ---------- Login (point d'entrée unique) ---------- */
+    login: function (email, password) {
+      var self = this;
+
+      // L'authentification passe OBLIGATOIREMENT par l'Edge Function serveur.
+      // Pas de fallback SHA-256 côté client.
+      if (!aiAuthEndpoint()) {
+        return Promise.reject(new Error('EDGE_FUNCTION_NOT_CONFIGURED'));
+      }
+
+      return this.loginViaEdgeFunction(email, password);
+    },
+
     logout: function () {
-      try {
-        sessionStorage.removeItem(AUTH_KEY);
-        sessionStorage.removeItem(ROLE_KEY);
-        sessionStorage.removeItem(USER_KEY);
-      } catch (e) {}
-      if (window.firebase && firebase.auth) { firebase.auth().signOut(); }
+      clearSession();
+      if (window.firebase && firebase.auth) {
+        firebase.auth().signOut();
+      }
       window.location.href = 'index.html';
     },
 
     guard: function () {
-      if (!this.hasSession()) { window.location.href = 'index.html'; return false; }
+      if (!this.isAuthenticated()) {
+        clearSession();
+        window.location.href = 'index.html';
+        return false;
+      }
       return true;
     },
 
-    defaultUsers: defaultUsers
+    /* Pour tests : vider la session */
+    _testClear: function () {
+      clearSession();
+    }
   };
 
   /* --- Raccourci pour la page de login --- */

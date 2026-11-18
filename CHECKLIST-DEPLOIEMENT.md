@@ -26,7 +26,7 @@ point, voir « En cas de problème » à la fin.
 
 ## 3. Pipeline photos (Phase 2) — dans `admin/dashboard.html`
 
-- [ ] Connexion admin (`darmaroc` / `Netuser03$`)
+- [ ] Connexion admin (identifiants définis dans la base Supabase `admin_users`)
 - [ ] Ouvrir un bien → « Modifier » → section photos
 - [ ] Importer plusieurs photos → elles apparaissent en WebP HD avec le logo
       DarMaroc incrusté (coin bas-droit)
