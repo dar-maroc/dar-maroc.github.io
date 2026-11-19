@@ -77,7 +77,7 @@
         agent: Agent.name,
         agentId: Agent.id,
         type: 'real_estate_search',
-        missionId: missionId,
+        missionId: payload.missionId,
         content: 'Recherche d\'annonces préparée pour ' + cities.length + ' ville(s), ' + types.length + ' type(s), ' + kinds.length + ' catégorie(s).',
         data: {
           cities: cities,
